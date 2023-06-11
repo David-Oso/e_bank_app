@@ -1,0 +1,5 @@
+<p>Hi %s,
+            Your account have been registered.
+            Please click 'activate' below to activate your account.<br/>
+            <a href="%s"> Activate </a>
+</p>

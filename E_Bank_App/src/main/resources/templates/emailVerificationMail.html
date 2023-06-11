@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="eng">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E_Bank Verification</title>
+</head>
+<style>
+    .emailVerificationDiv{
+        background-color: rgba(0, 0, 0, 0.367);
+        width: 50%;
+        height: 100%;
+        margin: auto;
+        font-size: large;
+        font-weight: 400;
+        font-family: sans-serif;
+        padding: 2rem;
+    }
+    .linkButton:before{
+        color: white;
+    }
+    .linkButton:hover{
+        background-color: #ffffff6b;
+        text-decoration: dashed;
+    }
+    .linkButton{
+        padding: 10px;
+        width: min-content;
+        margin-left: 42%;
+        color: white;
+        background-color: black;
+        font-size: 1.5rem;
+        font-weight: bolder;
+        border-radius: 0.3cm;
+        text-decoration: none;
+    }
+
+    .noticeSpan{
+        color: red;
+        font-weight: 700;
+    }
+</style>
+
+
+<body>
+<div class="emailVerificationDiv">
+    <p>
+    <h4>Dear <span th:text="${name}"></span>,</h4><br/><br/>
+    <strong>Welcome to E_Bank Nigeria</strong> where we help you to perform any kind
+    transaction at your comfort without the need of going to the bank.
+    As a valued customer, we're excited to have you join our application users. <br/>
+    Our goal is to provide you with exceptional online banking with ease.
+    </p>
+
+    <p>
+        To activate your account, please click on the 'activate' button. By clicking on
+        the activate button, your are eligible to perform your bank
+        transactions without hindrance.
+    </p>
+    <a class="linkButton" th:href="${link}">Activate</a>
+
+    <p><br>
+        Thank you for choosing E_Bank Nigeria. <span class="noticeSpan">Please note that the button will expire after 30 minutes.</span>
+    </p><br>
+
+
+    <p>
+        Best Regards,<br/>
+        <Strong>Oso Temidayo David</Strong><br>
+        Java Software engineer and
+        the Builder of E_Bank Application
+    </p>
+</div>
+
+
+</body>
+</html>
