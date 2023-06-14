@@ -15,7 +15,7 @@ import static com.bank.E_Bank_App.utils.E_BankUtils.BANK_NAME;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmailNotificationRequest {
+public class EmailRequest {
     private final Sender sender = new Sender(BANK_NAME, BANK_EMAIL);
     private List<Recipient> to = new ArrayList<>();
     private String subject;

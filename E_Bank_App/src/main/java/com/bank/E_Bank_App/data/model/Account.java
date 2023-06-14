@@ -23,6 +23,6 @@ public class Account {
     private String accountNumber;
     private BigDecimal balance;
     private int pin;
-    @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Transaction> transaction;
 }
