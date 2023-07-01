@@ -25,7 +25,7 @@ class CustomerServiceImplTest {
         registerRequest1.setPassword("Password");
         registerRequest1.setPhoneNumber("+2345098767845");
         registerRequest1.setGender(Gender.MALE);
-        registerRequest1.setDateOfBirth("09/08/2013");
+        registerRequest1.setDateOfBirth("09/08/2003");
     }
 
     @Test

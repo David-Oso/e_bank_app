@@ -28,7 +28,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     @Async
-    public void sendHtmlMail(String email, String name, String subject, String htmlContent) {
+    public String sendHtmlMail(String email, String name, String subject, String htmlContent) {
         try{
         EmailRequest request = new EmailRequest();
         Recipient recipient = new Recipient(name, email);
@@ -44,32 +44,33 @@ public class MailServiceImpl implements MailService {
         ResponseEntity<String> response =
                 restTemplate.postForEntity(mailUrl, requestEntity, String.class);
         log.info(":::::::::::::::::::EMAIL SENT SUCCESSFULLY:::::::::::::::::::");
+        return response.getBody();
         }catch (Exception exception){
             throw new RuntimeException("Error sending mail");
         }
     }
 
-//    @Override
-//    @Async
-//    public void sendHtml(String recipientName, String recipientEmail, String subject, String htmlContent) {
-//        try{
-//            EmailRequest emailRequest = new EmailRequest();
-//            emailRequest.setSubject(subject);
-//            Recipient recipient = new Recipient(recipientName, recipientEmail);
-//            emailRequest.getTo().add(recipient);
-//            emailRequest.setHtmlContent(htmlContent);
-//            webclient
-//            .baseUrl(mailUrl)
-//            .defaultHeader("api-key", mailApiKey)
-//              .build()
-//              .post()
-//              .bodyValue(emailRequest)
-//              .retrieve()
-//              .bodyToMono(String.class)
-//              .block();
-//            log.info(":::::::::::::::Email Sent Successfully:::::::::::::::");
-//        }catch (Exception exception){
-//            throw new RuntimeException("Error sending mail");
-//        }
-//    }
+    @Override
+    @Async
+    public void sendHtml(String recipientName, String recipientEmail, String subject, String htmlContent) {
+        try{
+            EmailRequest emailRequest = new EmailRequest();
+            emailRequest.setSubject(subject);
+            Recipient recipient = new Recipient(recipientName, recipientEmail);
+            emailRequest.getTo().add(recipient);
+            emailRequest.setHtmlContent(htmlContent);
+            webclient
+            .baseUrl(mailUrl)
+            .defaultHeader("api-key", mailApiKey)
+              .build()
+              .post()
+              .bodyValue(emailRequest)
+              .retrieve()
+              .bodyToMono(String.class)
+              .block();
+            log.info(":::::::::::::::::::EMAIL SENT SUCCESSFULLY:::::::::::::::::::");
+        }catch (Exception exception){
+            throw new RuntimeException("Error sending mail");
+        }
+    }
 }

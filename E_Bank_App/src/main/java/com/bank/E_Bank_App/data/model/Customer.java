@@ -79,3 +79,5 @@ public class Customer implements UserDetails {
         return isEnable;
     }
 }
+// @OneToMany( cascade = CascadeType.DETACH, mappedBy = "churchBranch", orphanRemoval = true)
+//    private final List<ChurchTokenZ> listOfToken  = new ArrayList<>();

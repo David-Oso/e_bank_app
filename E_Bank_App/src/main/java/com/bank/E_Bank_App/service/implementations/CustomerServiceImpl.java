@@ -101,15 +101,15 @@ public class CustomerServiceImpl implements CustomerService {
         else return years;
     }
 
-//    private void  sendVerificationMail(Customer customer, String token) {
-//        String firstName = customer.getFirstName();
-//        String email = customer.getEmail();
-//        String subject = "E_Bank Account Verification";
-//        Context context = new Context();
-//        context.setVariables(Map.of("name", firstName, "token", token));
-//        String htmlContent = templateEngine.process("emailVerificationMail", context);
-//        mailService.sendHtml(email, firstName, subject, htmlContent);
-//    }
+    private void  sendVerificationMail(Customer customer, String token) {
+        String firstName = customer.getFirstName();
+        String email = customer.getEmail();
+        String subject = "E_Bank Account Verification";
+        Context context = new Context();
+        context.setVariables(Map.of("name", firstName, "token", token));
+        String htmlContent = templateEngine.process("emailVerificationMail", context);
+        mailService.sendHtml(email, firstName, subject, htmlContent);
+    }
 
 // Context context = new Context();
 ////        String verificationLink = E_BankUtils.generateVerificationLink(email);
@@ -118,20 +118,11 @@ public class CustomerServiceImpl implements CustomerService {
 ////
 // mailService.sendHtml(email, email, "E_Bank Account Verification", htmlContent);
 
-    private void sendVerificationMail(Customer customer, String token){
-        String mailTemplate = E_BankUtils.GET_VERIFICATION_MAIL_TEMPLATE;
-        String firstName = customer.getFirstName();
-        String htmlContent = String.format(mailTemplate, firstName, token);
-        String subject = "Email Verification";
-        mailService.sendHtmlMail(customer.getEmail(), firstName, subject, htmlContent);
-    }
-//          EmailNotificationRequest notificationRequest = new EmailNotificationRequest();
-////        String mailTemplate = E_BankUtils.getMailTemplate();
-////        notificationRequest.setHtmlContent(String.format(mailTemplate, request.getEmail(), E_BankUtils.generateVerificationLink(0L)));
-////        notificationRequest.getTo().add(new Recipient(request.getEmail(), request.getEmail()));
-////        notificationRequest.setSubject("Registration Verification Link");
-////        String response = mailService.sendHtmlMail(notificationRequest);
-////        if(response != null)return  "Check your mail for the verification link to active you account";
-////        throw new EBankFailureException("Registration failure");
-
+//    private void sendVerificationMail(Customer customer, String token){
+//        String mailTemplate = E_BankUtils.GET_VERIFICATION_MAIL_TEMPLATE;
+//        String firstName = customer.getFirstName();
+//        String htmlContent = String.format(mailTemplate, firstName, token);
+//        String subject = "Email Verification";
+//        mailService.sendHtmlMail(customer.getEmail(), firstName, subject, htmlContent);
+//    }
 }
