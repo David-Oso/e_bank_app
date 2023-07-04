@@ -21,4 +21,5 @@ public class EmailVerificationRequest {
     @NotBlank(message = "field email cannot be blank")
     @Email(message = "must be valid email address", regexp = EMAIL_REGEX_STRING)
     private String email;
+    String token;
 }

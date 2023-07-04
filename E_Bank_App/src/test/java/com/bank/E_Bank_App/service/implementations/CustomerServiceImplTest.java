@@ -26,11 +26,24 @@ class CustomerServiceImplTest {
         registerRequest1.setPhoneNumber("+2345098767845");
         registerRequest1.setGender(Gender.MALE);
         registerRequest1.setDateOfBirth("09/08/2003");
+
+        registerRequest2 = new RegisterRequest();
+        registerRequest2.setFirstName("Tolu");
+        registerRequest2.setLastName("Tope");
+        registerRequest2.setEmail("osodavid272@gmail.com");
+        registerRequest2.setPassword("Password");
+        registerRequest2.setPhoneNumber("+2345098767867");
+        registerRequest2.setGender(Gender.FEMALE);
+        registerRequest2.setDateOfBirth("10/08/2003");
     }
 
     @Test
     void register() {
         RegisterResponse response = customerService.register(registerRequest1);
+        assertThat(response.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
+        assertThat(response.isSuccess()).isEqualTo(true);
+
+        RegisterResponse response1 = customerService.register(registerRequest2);
         assertThat(response.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
         assertThat(response.isSuccess()).isEqualTo(true);
     }

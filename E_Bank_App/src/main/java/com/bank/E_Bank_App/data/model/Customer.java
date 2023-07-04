@@ -21,15 +21,16 @@ public class Customer {
     private String phoneNumber;
     @Column(unique = true)
     private String email;
+    @Enumerated(EnumType.STRING)
     private Gender gender;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Account account;
+    private final Account account = new Account();
     private LocalDate dateOfBirth;
     private String password;
-    private LocalDateTime createdAt;
+    private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private final Role role = Role.CUSTOMER;
     private boolean isEnable = false;
     private boolean isLocked = false;
 }

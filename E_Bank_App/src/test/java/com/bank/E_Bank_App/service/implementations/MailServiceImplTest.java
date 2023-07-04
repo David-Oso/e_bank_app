@@ -13,7 +13,7 @@ class MailServiceImplTest {
     @Autowired MailService mailService;
 
     @Test
-    void sendHtmlMail() {
+    void sendHtmlMailTest() {
         String name = "David";
         String email = "osodavid001@gmail.com";
         String subject = "Testing whether the send mail is working";
@@ -22,9 +22,5 @@ class MailServiceImplTest {
         String response = mailService.sendHtmlMail(email, name, subject, htmlContent);
         assertThat(response).isNotNull();
 
-    }
-
-    @Test
-    void sendHtml() {
     }
 }

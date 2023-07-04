@@ -3,6 +3,7 @@ package com.bank.E_Bank_App.service.implementations;
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.AuthenticationRequest;
+import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
@@ -43,6 +44,15 @@ public class CustomerServiceImpl implements CustomerService {
                 .message("Check your mail for verification token to activate your account")
                 .isSuccess(true)
                 .build();
+    }
+
+    @Override
+    public String verifyEmail(EmailVerificationRequest request) {
+        Customer registeredCustomer = getCustomerByEmail(request.getEmail());
+        if(!registeredCustomer.isLocked()){
+
+        }
+        return null;
     }
 
     private void checkIfEmailAlreadyExists(String email) {
