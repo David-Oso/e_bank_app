@@ -10,6 +10,7 @@ import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.exception.EBankFailureException;
 import com.bank.E_Bank_App.exception.E_BankException;
+import com.bank.E_Bank_App.exception.InvalidDetailsException;
 import com.bank.E_Bank_App.exception.NotFoundException;
 import com.bank.E_Bank_App.service.CustomerService;
 import com.bank.E_Bank_App.service.MailService;
@@ -92,7 +93,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        return null;
+        Customer customer = getCustomerByEmail(request.getEmail());
+        if(!customer.getPassword().equals(request.getPassword()))
+            throw new InvalidDetailsException("Incorrect Password");
+        else return AuthenticationResponse.builder()
+                    .message("Authentication successful")
+                    .isAuthenticated(true)
+                    .build();
     }
 
     @Override
