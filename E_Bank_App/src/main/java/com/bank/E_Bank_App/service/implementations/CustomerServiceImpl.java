@@ -11,6 +11,7 @@ import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.NotFoundException;
 import com.bank.E_Bank_App.service.CustomerService;
 import com.bank.E_Bank_App.service.MailService;
+import com.bank.E_Bank_App.service.MyTokenService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -26,20 +27,21 @@ import java.util.Map;
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final MailService mailService;
+    private final MyTokenService myTokenService;
     private final ModelMapper modelMapper;
 //    private final PasswordEncoder passwordEncoder;
     @Override
     public RegisterResponse register(RegisterRequest request) {
         checkIfEmailAlreadyExists(request.getEmail());
-        Customer savedCustomer = getSavedCustomer(request);
-        String token = E_BankUtils.generateRandomString(5);
-        int age = validateAge(savedCustomer.getDateOfBirth());
+        Customer customer = getSavedCustomer(request);
+        String token = myTokenService.generateAndSaveMyToken(customer);
+        int age = validateAge(customer.getDateOfBirth());
         if (age == 0){
-            savedCustomer.setLocked(true);
-            customerRepository.save(savedCustomer);
+            customer.setLocked(true);
+            customerRepository.save(customer);
             throw new E_BankException("Cannot register this account because you are less than 16 years old");
         }
-        sendVerificationMail(savedCustomer, token);
+        sendVerificationMail(customer, token);
         return RegisterResponse.builder()
                 .message("Check your mail for verification token to activate your account")
                 .isSuccess(true)
@@ -66,7 +68,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     public void resendVerificationMail(Customer customer) {
-        String token = E_BankUtils.generateRandomString(5);
+        String token = myTokenService.generateAndSaveMyToken(customer);
         sendVerificationMail(customer, token);
     }
 
