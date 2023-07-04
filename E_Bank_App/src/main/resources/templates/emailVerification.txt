@@ -1,0 +1,23 @@
+<p>
+    <h4>Dear %s,</h4><br/><br/>
+    <strong>Welcome to E_Bank Nigeria</strong> where we help you to perform any kind
+    transaction at your comfort without the need of going to the bank.
+    As a valued customer, we're excited to have you join our application users. <br/>
+    Our goal is to provide you with exceptional online banking with ease.
+    </p>
+
+    <p>
+        Please enter the following to activate your account<br>
+                <h2>%s</h2>
+    </p>
+
+    <p><br>
+        Thank you for choosing E_Bank Nigeria. <span class="noticeSpan">Please note that the button will expire after 30 minutes.</span>
+    </p><br>
+
+    <p>
+        Best Regards,<br/>
+        <Strong>Oso Temidayo David</Strong><br>
+        Java Software engineer and
+        the Builder of E_Bank Application
+    </p>

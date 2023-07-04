@@ -1,15 +1,10 @@
 package com.bank.E_Bank_App.utils;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.Key;
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.Base64;
-import java.util.Date;
 import java.util.stream.Collectors;
 
 public class E_BankUtils {
@@ -25,8 +20,8 @@ public class E_BankUtils {
     public static final String BANK_PHONE_NUMBER = "+2349012345678";
     public static final String USER_VERIFICATION_BASE_URL = "localhost:8000/api/v1/customer/verify";
 
-    private static final String VERIFICATION_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\emailVerificationMail.html";
     private static final String ACCOUNT_BALANCE_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\accountBalance.html";
+    private static final String EMAIL_VERIFICATION_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\emailVerification.txt";
     public static String getTemplate(String templateLocation){
         try(BufferedReader reader =
                     new BufferedReader(new FileReader(templateLocation))){
@@ -35,7 +30,7 @@ public class E_BankUtils {
             throw new RuntimeException(exception.getMessage());
         }
     }
-    public static String GET_VERIFICATION_MAIL_TEMPLATE = getTemplate(VERIFICATION_MAIL_TEMPLATE_LOCATION);
+    public static String GET_EMAIL_VERIFICATION_MAIL_TEMPLATE = getTemplate(EMAIL_VERIFICATION_TEMPLATE_LOCATION);
     public static String GET_ACCOUNT_BALANCE_MAIL_TEMPLATE = getTemplate(ACCOUNT_BALANCE_MAIL_TEMPLATE_LOCATION);
 
 //    public static String generateVerificationLink(String email) {
