@@ -3,9 +3,7 @@ package com.bank.E_Bank_App.service.implementations;
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.MyToken;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
-import com.bank.E_Bank_App.dto.request.AuthenticationRequest;
-import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
-import com.bank.E_Bank_App.dto.request.RegisterRequest;
+import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.exception.EBankFailureException;
@@ -90,7 +88,6 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.save(customer);
     }
 
-
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         Customer customer = getCustomerByEmail(request.getEmail());
@@ -112,6 +109,31 @@ public class CustomerServiceImpl implements CustomerService {
     public Customer getCustomerByEmail(String email) {
         return customerRepository.findByEmail(email).orElseThrow(
                 ()-> new NotFoundException("Customer with email %s not found".formatted(email)));
+    }
+
+    @Override
+    public String setUpAccount(SetUpAccountRequest request) {
+        return null;
+    }
+
+    @Override
+    public String makeDeposit(DepositRequest request) {
+        return null;
+    }
+
+    @Override
+    public String makeWithdraw(WithDrawRequest request) {
+        return null;
+    }
+
+    @Override
+    public String makeTransfer(TransferRequest request) {
+        return null;
+    }
+
+    @Override
+    public String resetPassword(ResetPasswordRequest request) {
+        return null;
     }
 
     private LocalDate convertDateOBirthToLocalDate(String date) {
