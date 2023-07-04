@@ -1,12 +1,14 @@
 package com.bank.E_Bank_App.service.implementations;
 
 import com.bank.E_Bank_App.data.model.Customer;
+import com.bank.E_Bank_App.data.model.MyToken;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.AuthenticationRequest;
 import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
+import com.bank.E_Bank_App.exception.EBankFailureException;
 import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.NotFoundException;
 import com.bank.E_Bank_App.service.CustomerService;
@@ -21,6 +23,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -52,9 +55,13 @@ public class CustomerServiceImpl implements CustomerService {
     public String verifyEmail(EmailVerificationRequest request) {
         Customer registeredCustomer = getCustomerByEmail(request.getEmail());
         if(!registeredCustomer.isLocked()){
-
+            Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(request.getToken(), registeredCustomer);
+            registeredCustomer.setEnable(true);
+            customerRepository.save(registeredCustomer);
+            myTokenService.deleteToken(receivedToken.get());
+            return "Verification successful";
         }
-        return null;
+        throw new E_BankException("Error verifying email");
     }
 
     private void checkIfEmailAlreadyExists(String email) {
@@ -97,7 +104,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer getCustomerByEmail(String email) {
         return customerRepository.findByEmail(email).orElseThrow(
-                ()-> new NotFoundException("Customer with this email not found"));
+                ()-> new NotFoundException("Customer with email %s not found".formatted(email)));
     }
 
     private LocalDate convertDateOBirthToLocalDate(String date) {
