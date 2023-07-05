@@ -146,7 +146,26 @@ public class CustomerServiceImpl implements CustomerService {
         Transaction transaction = setTransaction(amount, TransactionType.DEPOSIT);
         account.getTransactions().add(transaction);
         customerRepository.save(customer);
+        sendDepositNotification(customer, amount);
         return "Transaction Successful";
+    }
+
+    private void sendDepositNotification(Customer customer, BigDecimal amount) {
+        String mailTemplate = E_BankUtils.GET_DEPOSIT_NOTIFICATION_MAIL_TEMPLATE;
+        String name = customer.getFirstName();
+        String accountName = "%s %s".formatted(customer.getFirstName(), customer.getLastName());
+        StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
+        String accountNumber = number.replace(2, 8, "********").toString();
+        String description = "Deposit";
+        String transactionAmount = "₦%s".formatted(amount);
+        String transactionDateAndTime = "";
+        String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
+        String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
+        String myEmail = "osodavid001@gmail.com";
+        String subject = "Credit Alert Notification";
+        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber,
+                description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
+        mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
     }
 
     @Override

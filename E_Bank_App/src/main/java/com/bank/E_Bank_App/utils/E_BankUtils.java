@@ -20,9 +20,9 @@ public class E_BankUtils {
     public static final String BANK_PHONE_NUMBER = "+2349030400837";
     public static final String USER_VERIFICATION_BASE_URL = "localhost:8000/api/v1/customer/verify";
 
-    private static final String ACCOUNT_BALANCE_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\accountBalance.html";
     private static final String EMAIL_VERIFICATION_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\emailVerification.txt";
     private static final String RESET_PASSWORD_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\ResetPasswordMail.html";
+    private static final String DEPOSIT_NOTIFICATION_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\depositNotificationMail.html";
     public static String getTemplate(String templateLocation){
         try(BufferedReader reader =
                     new BufferedReader(new FileReader(templateLocation))){
@@ -32,7 +32,7 @@ public class E_BankUtils {
         }
     }
     public static String GET_EMAIL_VERIFICATION_MAIL_TEMPLATE = getTemplate(EMAIL_VERIFICATION_TEMPLATE_LOCATION);
-    public static String GET_ACCOUNT_BALANCE_MAIL_TEMPLATE = getTemplate(ACCOUNT_BALANCE_MAIL_TEMPLATE_LOCATION);
+    public static String GET_DEPOSIT_NOTIFICATION_MAIL_TEMPLATE = getTemplate(DEPOSIT_NOTIFICATION_MAIL_TEMPLATE_LOCATION);
     public static String GET_RESET_PASSWORD_MAIL_TEMPLATE = getTemplate(RESET_PASSWORD_TEMPLATE_LOCATION);
 
 //    public static String generateVerificationLink(String email) {

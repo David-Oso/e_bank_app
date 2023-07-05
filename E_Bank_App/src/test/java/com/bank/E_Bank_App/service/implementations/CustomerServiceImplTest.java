@@ -84,7 +84,7 @@ class CustomerServiceImplTest {
         updateCustomerRequest.setUserId(2L);
         updateCustomerRequest.setFirstName("NewFirstName");
         updateCustomerRequest.setLastName("NewLastName");
-        updateCustomerRequest.setPassword("Password");
+        updateCustomerRequest.setPassword("NewPassword");
         updateCustomerRequest.setGender(Gender.MALE);
         updateCustomerRequest.setNewPassword("NewPassword");
         updateCustomerRequest.setDateOfBirth("21/08/2004");
