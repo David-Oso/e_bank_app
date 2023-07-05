@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class CustomerServiceImplTest {
@@ -120,4 +122,9 @@ class CustomerServiceImplTest {
         assertThat(response2).isEqualTo("Account is set up");
     }
 
+    @Test
+    void makeDepositTest(){
+        String response = customerService.makeDeposit(1L, BigDecimal.valueOf(5000));
+        assertThat(response).isEqualTo("Transaction Successful");
+    }
 }

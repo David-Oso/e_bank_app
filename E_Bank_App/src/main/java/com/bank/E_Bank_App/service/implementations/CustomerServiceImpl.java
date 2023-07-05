@@ -1,13 +1,10 @@
 package com.bank.E_Bank_App.service.implementations;
 
-import com.bank.E_Bank_App.data.model.Account;
-import com.bank.E_Bank_App.data.model.Customer;
-import com.bank.E_Bank_App.data.model.MyToken;
+import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
-import com.bank.E_Bank_App.exception.EBankFailureException;
 import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
 import com.bank.E_Bank_App.exception.NotFoundException;
@@ -22,9 +19,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -138,7 +135,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String makeDeposit(Long userId, BigDecimal amount) {
-        return null;
+        if(amount == null)
+            throw new E_BankException("amount cannot be empty");
+        Customer customer = getCustomerById(userId);
+        Account account = customer.getAccount();
+        Transaction transaction = setTransaction(amount, TransactionType.DEPOSIT);
+        account.getTransaction().add(transaction);
+        customerRepository.save(customer);
+        return "Transaction Successful";
     }
 
     @Override
@@ -149,6 +153,14 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public String makeTransfer(TransferRequest request) {
         return null;
+    }
+
+    private static Transaction setTransaction(BigDecimal amount, TransactionType transactionType){
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTransactionType(transactionType);
+        transaction.setTransactionTime(LocalDateTime.now());
+        return transaction;
     }
 
     @Override
