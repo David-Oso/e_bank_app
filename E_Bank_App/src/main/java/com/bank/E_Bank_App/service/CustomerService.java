@@ -5,6 +5,8 @@ import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 
+import java.math.BigDecimal;
+
 public interface CustomerService {
     RegisterResponse register(RegisterRequest request);
     String verifyEmail(EmailVerificationRequest request);
@@ -15,5 +17,6 @@ public interface CustomerService {
     String makeDeposit(DepositRequest request);
     String makeWithdraw(WithDrawRequest request);
     String makeTransfer(TransferRequest request);
+    BigDecimal getBalance();
     String resetPassword(ResetPasswordRequest request);
 }

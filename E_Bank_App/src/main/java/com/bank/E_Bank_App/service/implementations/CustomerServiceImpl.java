@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -128,6 +129,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String makeTransfer(TransferRequest request) {
+        return null;
+    }
+
+    @Override
+    public BigDecimal getBalance() {
         return null;
     }
 
