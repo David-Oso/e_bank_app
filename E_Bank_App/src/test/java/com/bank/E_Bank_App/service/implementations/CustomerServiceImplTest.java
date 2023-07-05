@@ -27,6 +27,7 @@ class CustomerServiceImplTest {
     private WithDrawRequest withDrawRequest;
     private TransferRequest transferRequest;
     private UpdateCustomerRequest updateCustomerRequest;
+    private ResetPasswordRequest resetPasswordRequest;
 
 
     @BeforeEach
@@ -58,7 +59,7 @@ class CustomerServiceImplTest {
 
         authenticationRequest = new AuthenticationRequest();
         authenticationRequest.setEmail("osodavid001@gmail.com");
-        authenticationRequest.setPassword("Passwordit commit");
+        authenticationRequest.setPassword("Password");
 
         setUpAccountRequest1 = new SetUpAccountRequest();
         setUpAccountRequest1.setUserId(1L);
@@ -84,8 +85,15 @@ class CustomerServiceImplTest {
         updateCustomerRequest.setFirstName("NewFirstName");
         updateCustomerRequest.setLastName("NewLastName");
         updateCustomerRequest.setPassword("Password");
+        updateCustomerRequest.setGender(Gender.MALE);
         updateCustomerRequest.setNewPassword("NewPassword");
         updateCustomerRequest.setDateOfBirth("21/08/2004");
+
+        resetPasswordRequest = new ResetPasswordRequest();
+        resetPasswordRequest.setEmail("osodavid272@gmail.com");
+        resetPasswordRequest.setToken("8B-doU-w");
+        resetPasswordRequest.setNewPassword("NewPassword");
+        resetPasswordRequest.setConfirmPassword("NewPassword");
     }
 
     @Test
@@ -190,5 +198,11 @@ class CustomerServiceImplTest {
     void sendResetPasswordMailTest(){
         String response = customerService.sendRequestPasswordMail(2L);
         assertThat(response).isEqualTo("Check your email to reset your password");
+    }
+
+    @Test
+    void resetPasswordTest(){
+        String response = customerService.resetPassword(resetPasswordRequest);
+        assertThat(response).isEqualTo("Password reset successful");
     }
 }

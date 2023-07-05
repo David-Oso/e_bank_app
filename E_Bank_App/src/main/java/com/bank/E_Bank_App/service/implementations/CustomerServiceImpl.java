@@ -259,7 +259,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String resetPassword(ResetPasswordRequest request) {
-        return null;
+        Customer customer = getCustomerByEmail(request.getEmail());
+        Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(request.getToken(), customer);
+        customer.setPassword(request.getNewPassword());
+        if(!customer.getPassword().equals(request.getConfirmPassword()))
+            throw new InvalidDetailsException("Password doesn't match");
+        customerRepository.save(customer);
+        myTokenService.deleteToken(receivedToken.get());
+        return "Password reset successful";
     }
 
     private LocalDate convertDateOBirthToLocalDate(String date) {
