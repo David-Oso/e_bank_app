@@ -20,5 +20,7 @@ public interface CustomerService {
     String makeWithdraw(WithDrawRequest request);
     String makeTransfer(TransferRequest request);
     BigDecimal getBalance(Long userId, String pin);
+    String updateCustomer(UpdateCustomerRequest request);
+    String sendRequestPasswordMail(Long userId);
     String resetPassword(ResetPasswordRequest request);
 }

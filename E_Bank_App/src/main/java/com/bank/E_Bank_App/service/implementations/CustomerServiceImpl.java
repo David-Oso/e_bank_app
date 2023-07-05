@@ -39,12 +39,9 @@ public class CustomerServiceImpl implements CustomerService {
         checkIfEmailAlreadyExists(request.getEmail());
         Customer customer = getSavedCustomer(request);
         String token = myTokenService.generateAndSaveMyToken(customer);
-        int age = validateAge(customer.getDateOfBirth());
-        if (age == 0){
-            customer.setLocked(true);
-            customerRepository.save(customer);
-            throw new E_BankException("Cannot register this account because you are less than 16 years old");
-        }
+        int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
+//        customer.setAge(age);
+        customerRepository.save(customer);
         sendVerificationMail(customer, token);
         return RegisterResponse.builder()
                 .message("Check your mail for verification token to activate your account")
@@ -168,7 +165,9 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private static void validatePin(String pin, String requestPin) {
-        if (!pin.equals(requestPin))
+        if (pin == null)
+            throw new E_BankException("Input your pin");
+        else if(!pin.equals(requestPin))
             throw new InvalidDetailsException("Incorrect pin");
     }
     private static void checkWhetherBalanceIsSufficient(BigDecimal balance, BigDecimal requestAmount){
@@ -214,6 +213,24 @@ public class CustomerServiceImpl implements CustomerService {
         else return calculateBalance(userId);
     }
 
+    @Override
+    public String updateCustomer(UpdateCustomerRequest request) {
+        Customer customer = getCustomerById(request.getUserId());
+        if(!customer.getPassword().equals(request.getPassword()))
+            throw new InvalidDetailsException("Incorrect password");
+        customer.setFirstName(request.getFirstName());
+        customer.setLastName(request.getLastName());
+        customer.setGender(request.getGender());
+        LocalDate dateOfBirth = convertDateOBirthToLocalDate(request.getDateOfBirth());
+        int age = changeDateToIntAndValidateAge(dateOfBirth);
+        customer.setDateOfBirth(dateOfBirth);
+//        customer.setAge(age);
+        customer.setPassword(request.getNewPassword());
+        customer.setUpdatedAt(LocalDateTime.now());
+        customerRepository.save(customer);
+        return "Customer Updated Successfully";
+    }
+
     private BigDecimal calculateBalance(Long userId){
         Customer customer = getCustomerById(userId);
         BigDecimal balance = BigDecimal.ZERO;
@@ -229,6 +246,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public String sendRequestPasswordMail(Long userId) {
+        Customer customer = getCustomerById(userId);
+        String mailTemplate = E_BankUtils.GET_RESET_PASSWORD_MAIL_TEMPLATE;
+        String firstName = customer.getFirstName();
+        String token = myTokenService.generateAndSaveMyToken(customer);
+        String htmlContent = String.format(mailTemplate, firstName, token, E_BankUtils.BANK_PHONE_NUMBER);
+        String subject = "Reset Password";
+        mailService.sendHtmlMail(firstName, customer.getEmail(), subject, htmlContent);
+        return "Check your email to reset your password";
+    }
+
+    @Override
     public String resetPassword(ResetPasswordRequest request) {
         return null;
     }
@@ -237,9 +266,10 @@ public class CustomerServiceImpl implements CustomerService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return LocalDate.parse(date, formatter);
     }
-    private int validateAge(LocalDate date) {
+    private int changeDateToIntAndValidateAge(LocalDate date) {
         int years = Period.between(date, LocalDate.now()).getYears();
-        if(years < 16)return 0;
+        if(years < 16)
+            throw new E_BankException("Cannot register this account because you are less than 16 years old");
         else return years;
     }
 

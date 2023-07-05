@@ -26,6 +26,7 @@ public class Customer {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private final Account account = new Account();
     private LocalDate dateOfBirth;
+//    private int age;
     private String password;
     private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;

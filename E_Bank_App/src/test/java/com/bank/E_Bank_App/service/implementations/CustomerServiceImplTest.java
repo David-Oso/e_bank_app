@@ -26,6 +26,7 @@ class CustomerServiceImplTest {
     private SetUpAccountRequest setUpAccountRequest2;
     private WithDrawRequest withDrawRequest;
     private TransferRequest transferRequest;
+    private UpdateCustomerRequest updateCustomerRequest;
 
 
     @BeforeEach
@@ -77,6 +78,14 @@ class CustomerServiceImplTest {
         transferRequest.setRecipientAccountNumber("9555684342");
         transferRequest.setAmount(BigDecimal.valueOf(20000));
         transferRequest.setPin("1234");
+
+        updateCustomerRequest = new UpdateCustomerRequest();
+        updateCustomerRequest.setUserId(2L);
+        updateCustomerRequest.setFirstName("NewFirstName");
+        updateCustomerRequest.setLastName("NewLastName");
+        updateCustomerRequest.setPassword("Password");
+        updateCustomerRequest.setNewPassword("NewPassword");
+        updateCustomerRequest.setDateOfBirth("21/08/2004");
     }
 
     @Test
@@ -169,5 +178,17 @@ class CustomerServiceImplTest {
         String recipientPin = recipient.getAccount().getPin();
         BigDecimal recipientBalance = customerService.getBalance(recipient.getId(), recipientPin);
         assertThat(recipientBalance).isEqualTo(BigDecimal.valueOf(20000).setScale(2));
+    }
+
+    @Test
+    void updateCustomerTest(){
+        String response = customerService.updateCustomer(updateCustomerRequest);
+        assertThat(response).isEqualTo("Customer Updated Successfully");
+    }
+
+    @Test
+    void sendResetPasswordMailTest(){
+        String response = customerService.sendRequestPasswordMail(2L);
+        assertThat(response).isEqualTo("Check your email to reset your password");
     }
 }
