@@ -112,4 +112,12 @@ class CustomerServiceImplTest {
         assertThat(foundCustomer.getLastName()).isEqualTo("Temz");
     }
 
+    @Test
+    void setUpAccountTest(){
+        String response1 = customerService.setUpAccount(setUpAccountRequest1);
+        assertThat(response1).isEqualTo("Account is set up");
+        String response2 = customerService.setUpAccount(setUpAccountRequest2);
+        assertThat(response2).isEqualTo("Account is set up");
+    }
+
 }
