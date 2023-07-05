@@ -12,7 +12,7 @@
     </p>
 
     <p><br>
-        Thank you for choosing E_Bank Nigeria. <span class="noticeSpan">Please note that the button will expire after 30 minutes.</span>
+        Thank you for choosing E_Bank Nigeria. <span class="noticeSpan">Please note that the button will expire after 10 minutes.</span>
     </p><br>
 
     <p>

@@ -21,8 +21,7 @@ public class Account {
     private String accountName;
     @Column(unique = true)
     private String accountNumber;
-    private BigDecimal balance;
-    private int pin;
+    private String pin;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Transaction> transaction;
 }

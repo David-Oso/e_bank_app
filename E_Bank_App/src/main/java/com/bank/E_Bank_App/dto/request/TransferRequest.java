@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class TransferRequest {
+    private Long userId;
+    private String recipientAccountNumber;
     private BigDecimal amount;
     private String pin;
 }

@@ -10,11 +10,12 @@ import java.math.BigDecimal;
 public interface CustomerService {
     RegisterResponse register(RegisterRequest request);
     String verifyEmail(EmailVerificationRequest request);
+    void resendVerificationMail(Customer customer);
     AuthenticationResponse authenticate(AuthenticationRequest request);
     Customer getCustomerById(Long customerId);
     Customer getCustomerByEmail(String email);
     String setUpAccount(SetUpAccountRequest request);
-    String makeDeposit(DepositRequest request);
+    String makeDeposit(Long userId, BigDecimal amount);
     String makeWithdraw(WithDrawRequest request);
     String makeTransfer(TransferRequest request);
     BigDecimal getBalance();

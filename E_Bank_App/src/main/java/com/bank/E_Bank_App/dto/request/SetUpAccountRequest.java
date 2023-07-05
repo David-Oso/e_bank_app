@@ -10,5 +10,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SetUpAccountRequest {
+    private Long userId;
     private String pin;
 }

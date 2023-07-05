@@ -1,5 +1,6 @@
 package com.bank.E_Bank_App.service.implementations;
 
+import com.bank.E_Bank_App.data.model.Account;
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.MyToken;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
@@ -19,11 +20,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +76,7 @@ public class CustomerServiceImpl implements CustomerService {
                     throw new E_BankException("Account has been locked for some time");
             }
     }
-
+    @Override
     public void resendVerificationMail(Customer customer) {
         String token = myTokenService.generateAndSaveMyToken(customer);
         sendVerificationMail(customer, token);
@@ -114,11 +117,27 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String setUpAccount(SetUpAccountRequest request) {
-        return null;
+        Customer customer = getCustomerById(request.getUserId());
+        Account account = customer.getAccount();
+        String accountName = "%s %s"
+                .formatted(customer.getFirstName(), customer.getLastName());
+        String accountNumber = generateAccountNumber();
+        account.setAccountName(accountName);
+        account.setAccountNumber(accountNumber);
+        account.setPin(request.getPin());
+        customerRepository.save(customer);
+        return "Account is set up";
+    }
+
+    private String generateAccountNumber() {
+        SecureRandom randomNumbers = new SecureRandom();
+        return randomNumbers.ints(10, 0, 10)
+                .mapToObj(String::valueOf)
+                .collect(Collectors.joining());
     }
 
     @Override
-    public String makeDeposit(DepositRequest request) {
+    public String makeDeposit(Long userId, BigDecimal amount) {
         return null;
     }
 

@@ -1,6 +1,7 @@
 package com.bank.E_Bank_App.service.implementations;
 
 import com.bank.E_Bank_App.data.model.Gender;
+import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.service.CustomerService;
@@ -15,6 +16,9 @@ class CustomerServiceImplTest {
     @Autowired CustomerService customerService;
     private RegisterRequest registerRequest1;
     private RegisterRequest registerRequest2;
+    private EmailVerificationRequest emailVerificationRequest1;
+    private EmailVerificationRequest emailVerificationRequest2;
+
 
     @BeforeEach
     void setUp() {
@@ -35,25 +39,42 @@ class CustomerServiceImplTest {
         registerRequest2.setPhoneNumber("+2345098767867");
         registerRequest2.setGender(Gender.FEMALE);
         registerRequest2.setDateOfBirth("10/08/2003");
+
+        emailVerificationRequest1 = new EmailVerificationRequest();
+        emailVerificationRequest1.setEmail("osodavid001@gmail.com");
+        emailVerificationRequest1.setToken("z-twfxrB");
+        emailVerificationRequest2 = new EmailVerificationRequest();
+        emailVerificationRequest2.setEmail("osodavid272@gmail.com");
+        emailVerificationRequest2.setToken("JWJdJ3dz");
     }
 
     @Test
-    void register() {
+    void registerUserTest() {
         RegisterResponse response = customerService.register(registerRequest1);
         assertThat(response.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
         assertThat(response.isSuccess()).isEqualTo(true);
 
         RegisterResponse response1 = customerService.register(registerRequest2);
-        assertThat(response.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
-        assertThat(response.isSuccess()).isEqualTo(true);
+        assertThat(response1.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
+        assertThat(response1.isSuccess()).isEqualTo(true);
     }
 
     @Test
-    void resendVerificationMail() {
+    void resendVerificationMailTest() {
+//        customerService.resendVerificationMail();
     }
 
     @Test
-    void authenticate() {
+    void verifyEmailTest(){
+        String response1 = customerService.verifyEmail(emailVerificationRequest1);
+        assertThat(response1).isEqualTo("Verification successful");
+
+        String response2 = customerService.verifyEmail(emailVerificationRequest2);
+        assertThat(response2).isEqualTo("Verification successful");
+    }
+
+    @Test
+    void authenticateUserTest() {
     }
 
     @Test

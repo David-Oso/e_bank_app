@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class WithDrawRequest {
+    private Long userId;
     private BigDecimal amount;
     private String pin;
 }
