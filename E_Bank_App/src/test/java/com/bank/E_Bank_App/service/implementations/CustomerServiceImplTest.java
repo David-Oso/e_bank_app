@@ -2,10 +2,7 @@ package com.bank.E_Bank_App.service.implementations;
 
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
-import com.bank.E_Bank_App.dto.request.AuthenticationRequest;
-import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
-import com.bank.E_Bank_App.dto.request.RegisterRequest;
-import com.bank.E_Bank_App.dto.request.SetUpAccountRequest;
+import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.service.CustomerService;
@@ -27,6 +24,7 @@ class CustomerServiceImplTest {
     private AuthenticationRequest authenticationRequest;
     private SetUpAccountRequest setUpAccountRequest1;
     private SetUpAccountRequest setUpAccountRequest2;
+    private WithDrawRequest withDrawRequest;
 
 
     @BeforeEach
@@ -51,10 +49,10 @@ class CustomerServiceImplTest {
 
         emailVerificationRequest1 = new EmailVerificationRequest();
         emailVerificationRequest1.setEmail("osodavid001@gmail.com");
-        emailVerificationRequest1.setToken("z-twfxrB");
+        emailVerificationRequest1.setToken("73-qxlVi");
         emailVerificationRequest2 = new EmailVerificationRequest();
         emailVerificationRequest2.setEmail("osodavid272@gmail.com");
-        emailVerificationRequest2.setToken("JWJdJ3dz");
+        emailVerificationRequest2.setToken("4vL2Y8dg");
 
         authenticationRequest = new AuthenticationRequest();
         authenticationRequest.setEmail("osodavid001@gmail.com");
@@ -67,6 +65,11 @@ class CustomerServiceImplTest {
         setUpAccountRequest2 = new SetUpAccountRequest();
         setUpAccountRequest2.setUserId(2L);
         setUpAccountRequest2.setPin("1245");
+
+        withDrawRequest = new WithDrawRequest();
+        withDrawRequest.setUserId(1L);
+        withDrawRequest.setAmount(BigDecimal.valueOf(10000));
+        withDrawRequest.setPin("1234");
     }
 
     @Test
@@ -124,13 +127,21 @@ class CustomerServiceImplTest {
 
     @Test
     void makeDepositTest(){
-        String response = customerService.makeDeposit(1L, BigDecimal.valueOf(5000));
+        String response = customerService.makeDeposit(1L, BigDecimal.valueOf(50000));
         assertThat(response).isEqualTo("Transaction Successful");
     }
 
     @Test
     void getBalanceTest(){
         BigDecimal balance = customerService.getBalance(1L, "1234");
-        assertThat(balance).isEqualTo(BigDecimal.valueOf(10000).setScale(2));
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(50000).setScale(2));
+    }
+
+    @Test
+    void makeWithdrawTest(){
+        String response = customerService.makeWithdraw(withDrawRequest);
+        assertThat(response).isEqualTo("Transaction Successful");
+        BigDecimal balance = customerService.getBalance(withDrawRequest.getUserId(), withDrawRequest.getPin());
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(40000).setScale(2));
     }
 }

@@ -153,7 +153,15 @@ public class CustomerServiceImpl implements CustomerService {
         String pin = account.getPin();
         if(!pin.equals(request.getPin()))
             throw new InvalidDetailsException("Pin is incorrect");
-        return null;
+        BigDecimal balance = calculateBalance(request.getUserId());
+        if(request.getAmount().compareTo(balance) > 0)
+            throw new E_BankException("Insufficient balance");
+        else{
+            Transaction transaction = setTransaction(request.getAmount(), TransactionType.WITHDRAW);
+            account.getTransactions().add(transaction);
+            customerRepository.save(customer);
+            return "Transaction Successful";
+        }
     }
 
     @Override
