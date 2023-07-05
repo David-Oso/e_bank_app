@@ -237,7 +237,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void sendTransferNotificationMail(Customer customer, BigDecimal amount, String toAccountNumber) {
-        String mailTemplate = E_BankUtils.GET_DEPOSIT_NOTIFICATION_MAIL_TEMPLATE;
+        String mailTemplate = E_BankUtils.GET_TRANSFER_NOTIFICATION_MAIL_TEMPLATE;
         String name = customer.getFirstName();
         String accountName = "%s %s".formatted(customer.getFirstName(), customer.getLastName());
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
@@ -249,7 +249,7 @@ public class CustomerServiceImpl implements CustomerService {
         String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
         String myEmail = "osodavid001@gmail.com";
-        String subject = "Credit Alert Notification";
+        String subject = "Transfer Transaction Notification";
         String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, recipientAccountNumber,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
         mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
