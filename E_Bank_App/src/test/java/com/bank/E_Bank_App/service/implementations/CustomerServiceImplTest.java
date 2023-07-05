@@ -1,5 +1,6 @@
 package com.bank.E_Bank_App.service.implementations;
 
+import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
 import com.bank.E_Bank_App.dto.request.AuthenticationRequest;
 import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
@@ -55,7 +56,7 @@ class CustomerServiceImplTest {
 
         authenticationRequest = new AuthenticationRequest();
         authenticationRequest.setEmail("osodavid001@gmail.com");
-        authenticationRequest.setPassword("Password");
+        authenticationRequest.setPassword("Passwordit commit");
 
         setUpAccountRequest1 = new SetUpAccountRequest();
         setUpAccountRequest1.setUserId(1L);
@@ -100,9 +101,12 @@ class CustomerServiceImplTest {
 
     @Test
     void getCustomerById() {
+        Customer foundCustomer = customerService.getCustomerById(1L);
+        assertThat(foundCustomer.getEmail()).isEqualTo(registerRequest1.getEmail());
     }
 
     @Test
     void getCustomerByEmail() {
     }
+
 }
