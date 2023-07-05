@@ -25,6 +25,7 @@ class CustomerServiceImplTest {
     private SetUpAccountRequest setUpAccountRequest1;
     private SetUpAccountRequest setUpAccountRequest2;
     private WithDrawRequest withDrawRequest;
+    private TransferRequest transferRequest;
 
 
     @BeforeEach
@@ -70,6 +71,12 @@ class CustomerServiceImplTest {
         withDrawRequest.setUserId(1L);
         withDrawRequest.setAmount(BigDecimal.valueOf(10000));
         withDrawRequest.setPin("1234");
+
+        transferRequest = new TransferRequest();
+        transferRequest.setUserId(1L);
+        transferRequest.setRecipientAccountNumber("9555684342");
+        transferRequest.setAmount(BigDecimal.valueOf(20000));
+        transferRequest.setPin("1234");
     }
 
     @Test
@@ -149,5 +156,18 @@ class CustomerServiceImplTest {
         assertThat(response).isEqualTo("Transaction Successful");
         BigDecimal balance = customerService.getBalance(withDrawRequest.getUserId(), withDrawRequest.getPin());
         assertThat(balance).isEqualTo(BigDecimal.valueOf(40000).setScale(2));
+    }
+
+    @Test
+    void makeTransferTest(){
+        String response  = customerService.makeTransfer(transferRequest);
+        assertThat(response).isEqualTo("Transaction Successful");
+        BigDecimal balance = customerService.getBalance(transferRequest.getUserId(), transferRequest.getPin());
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(20000).setScale(2));
+
+        Customer recipient = customerService.getCustomerByAccountNumber(transferRequest.getRecipientAccountNumber());
+        String recipientPin = recipient.getAccount().getPin();
+        BigDecimal recipientBalance = customerService.getBalance(recipient.getId(), recipientPin);
+        assertThat(recipientBalance).isEqualTo(BigDecimal.valueOf(20000).setScale(2));
     }
 }

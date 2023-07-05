@@ -184,7 +184,17 @@ public class CustomerServiceImpl implements CustomerService {
         validatePin(pin, request.getPin());
         BigDecimal balance = calculateBalance(request.getUserId());
         checkWhetherBalanceIsSufficient(balance, request.getAmount());
-        return null;
+        Customer recipient = getCustomerByAccountNumber(request.getRecipientAccountNumber());
+        Account recipientAccount = recipient.getAccount();
+
+        Transaction transaction = setTransaction(request.getAmount(), TransactionType.TRANSFER);
+        account.getTransactions().add(transaction);
+        customerRepository.save(customer);
+
+        transaction.setTransactionType(TransactionType.DEPOSIT);
+        recipientAccount.getTransactions().add(transaction);
+        customerRepository.save(recipient);
+        return "Transaction Successful";
     }
 
     private static Transaction setTransaction(BigDecimal amount, TransactionType transactionType){
