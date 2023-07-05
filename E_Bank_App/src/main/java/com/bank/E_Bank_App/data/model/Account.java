@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @AllArgsConstructor
@@ -23,5 +22,5 @@ public class Account {
     private String accountNumber;
     private String pin;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<Transaction> transaction;
+    private List<Transaction> transactions;
 }

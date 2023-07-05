@@ -127,4 +127,10 @@ class CustomerServiceImplTest {
         String response = customerService.makeDeposit(1L, BigDecimal.valueOf(5000));
         assertThat(response).isEqualTo("Transaction Successful");
     }
+
+    @Test
+    void getBalanceTest(){
+        BigDecimal balance = customerService.getBalance(1L, "1234");
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(10000).setScale(2));
+    }
 }

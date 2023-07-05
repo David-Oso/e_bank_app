@@ -18,6 +18,6 @@ public interface CustomerService {
     String makeDeposit(Long userId, BigDecimal amount);
     String makeWithdraw(WithDrawRequest request);
     String makeTransfer(TransferRequest request);
-    BigDecimal getBalance();
+    BigDecimal getBalance(Long userId, String pin);
     String resetPassword(ResetPasswordRequest request);
 }

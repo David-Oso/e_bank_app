@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -140,13 +141,18 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = getCustomerById(userId);
         Account account = customer.getAccount();
         Transaction transaction = setTransaction(amount, TransactionType.DEPOSIT);
-        account.getTransaction().add(transaction);
+        account.getTransactions().add(transaction);
         customerRepository.save(customer);
         return "Transaction Successful";
     }
 
     @Override
     public String makeWithdraw(WithDrawRequest request) {
+        Customer customer = getCustomerById(request.getUserId());
+        Account account = customer.getAccount();
+        String pin = account.getPin();
+        if(!pin.equals(request.getPin()))
+            throw new InvalidDetailsException("Pin is incorrect");
         return null;
     }
 
@@ -164,8 +170,26 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public BigDecimal getBalance() {
-        return null;
+    public BigDecimal getBalance(Long userId, String pin) {
+        Customer customer = getCustomerById(userId);
+        String accountPin = customer.getAccount().getPin();
+        if(!accountPin.equals(pin))
+            throw new InvalidDetailsException("Pin is incorrect");
+        else return calculateBalance(userId);
+    }
+
+    private BigDecimal calculateBalance(Long userId){
+        Customer customer = getCustomerById(userId);
+        BigDecimal balance = BigDecimal.ZERO;
+        List<Transaction> transactions = customer.getAccount().getTransactions();
+        for(Transaction transaction : transactions){
+            if(transaction.getTransactionType() == TransactionType.DEPOSIT)
+                balance = balance.add(transaction.getAmount());
+            if(transaction.getTransactionType() == TransactionType.WITHDRAW ||
+                    transaction.getTransactionType() == TransactionType.TRANSFER)
+                balance = balance.subtract(transaction.getAmount());
+        }
+        return balance;
     }
 
     @Override
