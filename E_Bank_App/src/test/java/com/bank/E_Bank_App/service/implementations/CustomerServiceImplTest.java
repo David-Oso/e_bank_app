@@ -107,6 +107,9 @@ class CustomerServiceImplTest {
 
     @Test
     void getCustomerByEmail() {
+        Customer foundCustomer = customerService.getCustomerByEmail("osodavid001@gmail.com");
+        assertThat(foundCustomer.getFirstName()).isEqualTo("Dave");
+        assertThat(foundCustomer.getLastName()).isEqualTo("Temz");
     }
 
 }
