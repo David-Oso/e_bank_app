@@ -23,6 +23,8 @@ public class E_BankUtils {
     private static final String EMAIL_VERIFICATION_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\emailVerification.txt";
     private static final String RESET_PASSWORD_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\ResetPasswordMail.html";
     private static final String DEPOSIT_NOTIFICATION_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\depositNotificationMail.html";
+    private static final String WITHDRAW_NOTIFICATION_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\withdrawNotificationMail.html";
+    private static final String TRANSFER_NOTIFICATION_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\transferNotificationMail.html";
     public static String getTemplate(String templateLocation){
         try(BufferedReader reader =
                     new BufferedReader(new FileReader(templateLocation))){
@@ -33,6 +35,8 @@ public class E_BankUtils {
     }
     public static String GET_EMAIL_VERIFICATION_MAIL_TEMPLATE = getTemplate(EMAIL_VERIFICATION_TEMPLATE_LOCATION);
     public static String GET_DEPOSIT_NOTIFICATION_MAIL_TEMPLATE = getTemplate(DEPOSIT_NOTIFICATION_MAIL_TEMPLATE_LOCATION);
+    public static String GET_WITHDRAW_NOTIFICATION_MAIL_TEMPLATE = getTemplate(WITHDRAW_NOTIFICATION_MAIL_TEMPLATE_LOCATION);
+    public static String GET_TRANSFER_NOTIFICATION_MAIL_TEMPLATE = getTemplate(TRANSFER_NOTIFICATION_MAIL_TEMPLATE_LOCATION);
     public static String GET_RESET_PASSWORD_MAIL_TEMPLATE = getTemplate(RESET_PASSWORD_TEMPLATE_LOCATION);
 
 //    public static String generateVerificationLink(String email) {
