@@ -118,6 +118,12 @@ class CustomerServiceImplTest {
     }
 
     @Test
+    void getCustomerByAccountNumberTest(){
+        Customer foundCustomer = customerService.getCustomerByAccountNumber("9872958385");
+        assertThat(foundCustomer.getEmail()).isEqualTo(registerRequest1.getEmail());
+    }
+
+    @Test
     void setUpAccountTest(){
         String response1 = customerService.setUpAccount(setUpAccountRequest1);
         assertThat(response1).isEqualTo("Account is set up");

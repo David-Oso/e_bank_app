@@ -14,6 +14,7 @@ public interface CustomerService {
     AuthenticationResponse authenticate(AuthenticationRequest request);
     Customer getCustomerById(Long customerId);
     Customer getCustomerByEmail(String email);
+    Customer getCustomerByAccountNumber(String accountNumber);
     String setUpAccount(SetUpAccountRequest request);
     String makeDeposit(Long userId, BigDecimal amount);
     String makeWithdraw(WithDrawRequest request);

@@ -114,6 +114,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Customer getCustomerByAccountNumber(String accountNumber) {
+        return customerRepository.findByAccount_AccountNumber(accountNumber).orElseThrow(
+                ()-> new NotFoundException(String.format("Customer with account number %s not found", accountNumber)));
+    }
+
+    @Override
     public String setUpAccount(SetUpAccountRequest request) {
         Customer customer = getCustomerById(request.getUserId());
         Account account = customer.getAccount();
@@ -151,21 +157,33 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = getCustomerById(request.getUserId());
         Account account = customer.getAccount();
         String pin = account.getPin();
-        if(!pin.equals(request.getPin()))
-            throw new InvalidDetailsException("Pin is incorrect");
+        validatePin(pin, request.getPin());
         BigDecimal balance = calculateBalance(request.getUserId());
-        if(request.getAmount().compareTo(balance) > 0)
+        checkWhetherBalanceIsSufficient(balance, request.getAmount());
+
+        Transaction transaction = setTransaction(request.getAmount(), TransactionType.WITHDRAW);
+        account.getTransactions().add(transaction);
+        customerRepository.save(customer);
+        return "Transaction Successful";
+    }
+
+    private static void validatePin(String pin, String requestPin) {
+        if (!pin.equals(requestPin))
+            throw new InvalidDetailsException("Incorrect pin");
+    }
+    private static void checkWhetherBalanceIsSufficient(BigDecimal balance, BigDecimal requestAmount){
+        if(requestAmount.compareTo(balance) > 0)
             throw new E_BankException("Insufficient balance");
-        else{
-            Transaction transaction = setTransaction(request.getAmount(), TransactionType.WITHDRAW);
-            account.getTransactions().add(transaction);
-            customerRepository.save(customer);
-            return "Transaction Successful";
-        }
     }
 
     @Override
     public String makeTransfer(TransferRequest request) {
+        Customer customer = getCustomerById(request.getUserId());
+        Account account = customer.getAccount();
+        String pin = account.getPin();
+        validatePin(pin, request.getPin());
+        BigDecimal balance = calculateBalance(request.getUserId());
+        checkWhetherBalanceIsSufficient(balance, request.getAmount());
         return null;
     }
 
@@ -182,7 +200,7 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = getCustomerById(userId);
         String accountPin = customer.getAccount().getPin();
         if(!accountPin.equals(pin))
-            throw new InvalidDetailsException("Pin is incorrect");
+            throw new InvalidDetailsException("Incorrect pin");
         else return calculateBalance(userId);
     }
 
