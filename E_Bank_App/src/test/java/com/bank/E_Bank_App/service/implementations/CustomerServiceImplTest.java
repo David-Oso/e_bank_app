@@ -1,8 +1,11 @@
 package com.bank.E_Bank_App.service.implementations;
 
 import com.bank.E_Bank_App.data.model.Gender;
+import com.bank.E_Bank_App.dto.request.AuthenticationRequest;
 import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
+import com.bank.E_Bank_App.dto.request.SetUpAccountRequest;
+import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.service.CustomerService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +21,9 @@ class CustomerServiceImplTest {
     private RegisterRequest registerRequest2;
     private EmailVerificationRequest emailVerificationRequest1;
     private EmailVerificationRequest emailVerificationRequest2;
+    private AuthenticationRequest authenticationRequest;
+    private SetUpAccountRequest setUpAccountRequest1;
+    private SetUpAccountRequest setUpAccountRequest2;
 
 
     @BeforeEach
@@ -46,6 +52,18 @@ class CustomerServiceImplTest {
         emailVerificationRequest2 = new EmailVerificationRequest();
         emailVerificationRequest2.setEmail("osodavid272@gmail.com");
         emailVerificationRequest2.setToken("JWJdJ3dz");
+
+        authenticationRequest = new AuthenticationRequest();
+        authenticationRequest.setEmail("osodavid001@gmail.com");
+        authenticationRequest.setPassword("Password");
+
+        setUpAccountRequest1 = new SetUpAccountRequest();
+        setUpAccountRequest1.setUserId(1L);
+        setUpAccountRequest1.setPin("1234");
+
+        setUpAccountRequest2 = new SetUpAccountRequest();
+        setUpAccountRequest2.setUserId(2L);
+        setUpAccountRequest2.setPin("1245");
     }
 
     @Test
@@ -75,6 +93,9 @@ class CustomerServiceImplTest {
 
     @Test
     void authenticateUserTest() {
+        AuthenticationResponse response = customerService.authenticate(authenticationRequest);
+        assertThat(response.getMessage()).isEqualTo("Authentication successful");
+        assertThat(response.isAuthenticated()).isEqualTo(true);
     }
 
     @Test
