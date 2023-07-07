@@ -242,22 +242,27 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void getTransactionByIdTest(){
-        Transaction transaction = customerService.getTransactionById(1L, 1L);
+    void getTransactionByCustomerIdAndTransactionIdTest(){
+        Transaction transaction = customerService.getTransactionByCustomerIdAndTransactionId(1L, 1L);
         assertThat(transaction.getAmount()).isEqualTo(BigDecimal.valueOf(50000.00));
         assertThat(transaction.getTransactionType()).isEqualTo(TransactionType.DEPOSIT);
 //        assertThat(transaction.getTransactionTime()).isEqualTo(LocalDateTime.parse("2023-07-05 15:58:22.708181"));
     }
 
     @Test
-    void getAllTransactionsTest(){
+    void getAllTransactionsByCustomerIdTest(){
         List<Transaction> transactions = customerService.getAllTransactionsByCustomerId(1L);
         assertThat(transactions).isNotNull();
     }
 
     @Test
-    void deleteTransactionByIdTest(){
+    void deleteTransactionByCustomerIdAndTransactionIdTest(){
         String response = customerService.deleteTransactionByCustomerIdAndTransactionId(2L, 1L);
         assertThat(response).isEqualTo("Transaction deleted");
+    }
+    @Test
+    void deleteAllTransactionByCustomerIdTest(){
+        String response = customerService.deleteAllTransactionsByCustomerId(2L);
+        assertThat(response).isEqualTo("Transactions deleted successfully");
     }
 }

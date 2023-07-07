@@ -26,7 +26,7 @@ public interface CustomerService {
     String sendRequestPasswordMail(Long customerId);
     String resetPassword(ResetPasswordRequest request);
     String uploadImage(UploadImageRequest request);
-    Transaction getTransactionById(Long customerId, Long transactionId);
+    Transaction getTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId);
     List<Transaction> getAllTransactionsByCustomerId(Long customerId);
     String deleteTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId);
     String deleteAllTransactionsByCustomerId(Long customerId);

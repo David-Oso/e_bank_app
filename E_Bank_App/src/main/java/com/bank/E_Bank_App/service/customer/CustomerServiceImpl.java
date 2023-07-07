@@ -34,14 +34,15 @@ public class CustomerServiceImpl implements CustomerService {
     private final MyTokenService myTokenService;
     private final ModelMapper modelMapper;
     private final CloudService cloudService;
-//    private final PasswordEncoder passwordEncoder;
+    //    private final PasswordEncoder passwordEncoder;
     @Override
     public RegisterResponse register(RegisterRequest request) {
         checkIfEmailAlreadyExists(request.getEmail());
         Customer customer = getSavedCustomer(request);
         String token = myTokenService.generateAndSaveMyToken(customer);
         int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
-//        customer.setAge(age);
+        customer.setAge(age);
+        customer.setGender(request.getGender());
         customerRepository.save(customer);
         sendVerificationMail(customer, token);
         return RegisterResponse.builder()
@@ -53,9 +54,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public String verifyEmail(EmailVerificationRequest request) {
         Customer registeredCustomer = getCustomerByEmail(request.getEmail());
-        if(!registeredCustomer.isLocked()){
+        AppUser appUser = registeredCustomer.getAppUser();
+        if(!appUser.isLocked()){
             Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(request.getToken(), registeredCustomer);
-            registeredCustomer.setEnable(true);
+            appUser.setEnable(true);
             customerRepository.save(registeredCustomer);
             myTokenService.deleteToken(receivedToken.get());
             return "Verification successful";
@@ -64,13 +66,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void checkIfEmailAlreadyExists(String email) {
-        boolean isPresent = customerRepository.findByEmail(email).isPresent();
-            if(isPresent){
-                Customer customer = customerRepository.findByEmail(email).get();
-                if(!customer.isEnable())resendVerificationMail(customer);
-                else if (customer.isLocked())
-                    throw new E_BankException("Account has been locked for some time");
-            }
+        boolean isPresent = customerRepository.findByAppUser_Email(email).isPresent();
+        if(isPresent){
+            Customer customer = customerRepository.findByAppUser_Email(email).get();
+            AppUser appUser = customer.getAppUser();
+            if(!appUser.isEnable())resendVerificationMail(customer);
+            else if (appUser.isLocked())
+                throw new E_BankException("Account has been locked for some time");
+        }
     }
     @Override
     public void resendVerificationMail(Customer customer) {
@@ -80,10 +83,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     private Customer getSavedCustomer(RegisterRequest request) {
         Customer customer = modelMapper.map(request, Customer.class);
+        AppUser appUser = customer.getAppUser();
         LocalDate dateOfBirth = convertDateOBirthToLocalDate(request.getDateOfBirth());
 //        String encodedPassword = passwordEncoder.encode(request.getPassword());
-//        customer.setPassword(encodedPassword);
-        customer.setPassword(request.getPassword());
+//        appUser.setPassword(encodedPassword);
+        appUser.setPassword(request.getPassword());
         customer.setDateOfBirth(dateOfBirth);
         return customerRepository.save(customer);
     }
@@ -91,23 +95,24 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         Customer customer = getCustomerByEmail(request.getEmail());
-        if(!customer.getPassword().equals(request.getPassword()))
+        AppUser appUser = customer.getAppUser();
+        if(!appUser.getPassword().equals(request.getPassword()))
             throw new InvalidDetailsException("Incorrect Password");
         else return AuthenticationResponse.builder()
-                    .message("Authentication successful")
-                    .isAuthenticated(true)
-                    .build();
+                .message("Authentication successful")
+                .isAuthenticated(true)
+                .build();
     }
 
     @Override
     public Customer getCustomerById(Long customerId) {
-        return customerRepository.findById(customerId).orElseThrow(
+        return customerRepository.findByAppUser_Id(customerId).orElseThrow(
                 ()-> new NotFoundException("Customer not found"));
     }
 
     @Override
     public Customer getCustomerByEmail(String email) {
-        return customerRepository.findByEmail(email).orElseThrow(
+        return customerRepository.findByAppUser_Email(email).orElseThrow(
                 ()-> new NotFoundException("Customer with email %s not found".formatted(email)));
     }
 
@@ -120,9 +125,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public String setUpAccount(SetUpAccountRequest request) {
         Customer customer = getCustomerById(request.getCustomerId());
+        String firstName = customer.getAppUser().getFirstName();
+        String lastName = customer.getAppUser().getLastName();
         Account account = customer.getAccount();
         String accountName = "%s %s"
-                .formatted(customer.getFirstName(), customer.getLastName());
+                .formatted(firstName, lastName);
         String accountNumber = generateAccountNumber();
         account.setAccountName(accountName);
         account.setAccountNumber(accountNumber);
@@ -152,14 +159,18 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void sendDepositNotification(Customer customer, BigDecimal amount, boolean isTransfer, Customer fromCustomer) {
         String mailTemplate = E_BankUtils.GET_DEPOSIT_NOTIFICATION_MAIL_TEMPLATE;
-        String name = customer.getFirstName();
-        String accountName = "%s %s".formatted(customer.getFirstName(), customer.getLastName());
+        String email = customer.getAppUser().getEmail();
+        String firstName = customer.getAppUser().getFirstName();
+        String fromCustomerFirstName = fromCustomer.getAppUser().getFirstName();
+        String fromCustomerLastName = fromCustomer.getAppUser().getLastName();
+        String lastName= customer.getAppUser().getLastName();
+        String accountName = "%s %s".formatted(firstName, lastName);
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
         String accountNumber = number.replace(2, 8, "********").toString();
         String transactionType = "Deposit";
         String description = "";
         if(isTransfer)
-            description = "Transfer from %s %s".formatted(fromCustomer.getFirstName(), fromCustomer.getLastName());
+            description = "Transfer from %s %s".formatted(fromCustomerFirstName, fromCustomerLastName);
         else description = "Deposit into your account";
         String transactionAmount = "₦%s".formatted(amount);
         String transactionDateAndTime = DateTimeFormatter.ofPattern("EEE, dd/MM/yy, hh:mm:ss a").format(LocalDateTime.now());
@@ -167,9 +178,9 @@ public class CustomerServiceImpl implements CustomerService {
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
         String myEmail = "osodavid001@gmail.com";
         String subject = "Credit Alert Notification";
-        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, transactionType,
+        String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
+        mailService.sendHtmlMail(firstName, email, subject, htmlContent);
     }
 
     @Override
@@ -189,8 +200,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void sendWithdrawNotificationMail(Customer customer, BigDecimal amount) {
         String mailTemplate = E_BankUtils.GET_WITHDRAW_NOTIFICATION_MAIL_TEMPLATE;
-        String name = customer.getFirstName();
-        String accountName = "%s %s".formatted(customer.getFirstName(), customer.getLastName());
+        String email = customer.getAppUser().getEmail();
+        String firstName = customer.getAppUser().getFirstName();
+        String lastName = customer.getAppUser().getLastName();
+        String accountName = "%s %s".formatted(firstName, lastName);
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
         String accountNumber = number.replace(2, 8, "********").toString();
         String transactionType = "Withdraw";
@@ -201,9 +214,9 @@ public class CustomerServiceImpl implements CustomerService {
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
         String myEmail = "osodavid001@gmail.com";
         String subject = "Debit Alert Notification";
-        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, transactionType,
+        String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
+        mailService.sendHtmlMail(firstName, email, subject, htmlContent);
     }
 
     private static void validatePin(String pin, String requestPin) {
@@ -242,8 +255,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void sendTransferNotificationMail(Customer customer, BigDecimal amount, String toAccountNumber) {
         String mailTemplate = E_BankUtils.GET_TRANSFER_NOTIFICATION_MAIL_TEMPLATE;
-        String name = customer.getFirstName();
-        String accountName = "%s %s".formatted(customer.getFirstName(), customer.getLastName());
+        String firstName = customer.getAppUser().getFirstName();
+        String email = customer.getAppUser().getEmail();
+        String lastName = customer.getAppUser().getLastName();
+        String accountName = "%s %s".formatted(firstName, lastName);
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
         String accountNumber = number.replace(2, 8, "********").toString();
         String recipientAccountNumber = new StringBuilder(toAccountNumber).replace(2, 8, "********").toString();
@@ -255,9 +270,9 @@ public class CustomerServiceImpl implements CustomerService {
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
         String myEmail = "osodavid001@gmail.com";
         String subject = "Transfer Transaction Notification";
-        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, recipientAccountNumber, description,
+        String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, recipientAccountNumber, description,
                 transactionType, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
+        mailService.sendHtmlMail(firstName, email, subject, htmlContent);
     }
 
     private static Transaction setTransaction(BigDecimal amount, TransactionType transactionType){
@@ -283,16 +298,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public String updateCustomer(UpdateCustomerRequest request) {
         Customer customer = getCustomerById(request.getUserId());
-        if(!customer.getPassword().equals(request.getPassword()))
+        AppUser appUser = customer.getAppUser();
+        if(!appUser.getPassword().equals(request.getPassword()))
             throw new InvalidDetailsException("Incorrect password");
-        customer.setFirstName(request.getFirstName());
-        customer.setLastName(request.getLastName());
+        appUser.setFirstName(request.getFirstName());
+        appUser.setLastName(request.getLastName());
         customer.setGender(request.getGender());
         LocalDate dateOfBirth = convertDateOBirthToLocalDate(request.getDateOfBirth());
         int age = changeDateToIntAndValidateAge(dateOfBirth);
         customer.setDateOfBirth(dateOfBirth);
-//        customer.setAge(age);
-        customer.setPassword(request.getNewPassword());
+        customer.setAge(age);
+        appUser.setPassword(request.getNewPassword());
         customer.setUpdatedAt(LocalDateTime.now());
         customerRepository.save(customer);
         return "Customer Updated Successfully";
@@ -316,20 +332,21 @@ public class CustomerServiceImpl implements CustomerService {
     public String sendRequestPasswordMail(Long customerId) {
         Customer customer = getCustomerById(customerId);
         String mailTemplate = E_BankUtils.GET_RESET_PASSWORD_MAIL_TEMPLATE;
-        String firstName = customer.getFirstName();
+        String firstName = customer.getAppUser().getFirstName();
         String token = myTokenService.generateAndSaveMyToken(customer);
         String htmlContent = String.format(mailTemplate, firstName, token, E_BankUtils.BANK_PHONE_NUMBER);
         String subject = "Reset Password";
-        mailService.sendHtmlMail(firstName, customer.getEmail(), subject, htmlContent);
+        mailService.sendHtmlMail(firstName, customer.getAppUser().getEmail(), subject, htmlContent);
         return "Check your email to reset your password";
     }
 
     @Override
     public String resetPassword(ResetPasswordRequest request) {
         Customer customer = getCustomerByEmail(request.getEmail());
+        AppUser appUser = customer.getAppUser();
         Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(request.getToken(), customer);
-        customer.setPassword(request.getNewPassword());
-        if(!customer.getPassword().equals(request.getConfirmPassword()))
+        appUser.setPassword(request.getNewPassword());
+        if(!appUser.getPassword().equals(request.getConfirmPassword()))
             throw new InvalidDetailsException("Password doesn't match");
         customerRepository.save(customer);
         myTokenService.deleteToken(receivedToken.get());
@@ -340,14 +357,14 @@ public class CustomerServiceImpl implements CustomerService {
     public String uploadImage(UploadImageRequest request) {
         Customer customer= getCustomerById(request.getCustomerId());
         String imageUrl = cloudService.upload(request.getProfileImage());
-//        customer.setImageUrl(imageUrl);
+        customer.setImageUrl(imageUrl);
         customer.setUpdatedAt(LocalDateTime.now());
         customerRepository.save(customer);
         return "Profile image uploaded";
     }
 
     @Override
-    public Transaction getTransactionById(Long customerId, Long transactionId) {
+    public Transaction getTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId) {
         Customer customer = getCustomerById(customerId);
         List<Transaction> transactions = customer.getAccount().getTransactions();
         for(Transaction transaction : transactions){
@@ -393,9 +410,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void sendVerificationMail(Customer customer, String token){
         String mailTemplate = E_BankUtils.GET_EMAIL_VERIFICATION_MAIL_TEMPLATE;
-        String firstName = customer.getFirstName();
+        String firstName = customer.getAppUser().getFirstName();
         String htmlContent = String.format(mailTemplate, firstName, token);
         String subject = "Email Verification";
-        mailService.sendHtmlMail(firstName, customer.getEmail(), subject, htmlContent);
+        mailService.sendHtmlMail(firstName, customer.getAppUser().getEmail(), subject, htmlContent);
     }
 }
