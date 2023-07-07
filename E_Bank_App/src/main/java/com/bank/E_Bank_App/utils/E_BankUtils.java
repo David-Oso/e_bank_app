@@ -13,7 +13,8 @@ public class E_BankUtils {
     public static final String NAME_REGEX = "^[A-Z][a-zA-Z]{0,39}$";
     public static final String PHONE_NUMBER_REGEX = "^(\\+?234|0)[789]\\d{9}$";
     public static final String PIN_REGEX = "^\\d{4}$";
-    public static final String AMOUNT_REGEX = "^\\d{4}$";
+    public static final String AMOUNT_REGEX = "^\\d";
+    public static final String ACCOUNT_NUMBER_REGEX = "^\\d{10}$";
     public static final String DATE_OF_BIRTH_REGEX = "dd/MM/yyy";
     public static final String BANK_NAME = "E_Bank Nigeria";
     public static final String BANK_LOCATION = "No 1, Olowo road, Sabo Lagos, Nigeria.";

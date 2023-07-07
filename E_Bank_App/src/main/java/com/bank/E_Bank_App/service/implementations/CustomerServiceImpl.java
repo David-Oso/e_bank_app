@@ -120,7 +120,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String setUpAccount(SetUpAccountRequest request) {
-        Customer customer = getCustomerById(request.getUserId());
+        Customer customer = getCustomerById(request.getCustomerId());
         Account account = customer.getAccount();
         String accountName = "%s %s"
                 .formatted(customer.getFirstName(), customer.getLastName());
@@ -142,7 +142,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public String makeDeposit(DepositRequest request) {
 
-        Customer customer = getCustomerById(request.getUserId());
+        Customer customer = getCustomerById(request.getCustomerId());
         Account account = customer.getAccount();
         Transaction transaction = setTransaction(request.getAmount(), TransactionType.DEPOSIT);
         account.getTransactions().add(transaction);
@@ -175,11 +175,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String makeWithdraw(WithDrawRequest request) {
-        Customer customer = getCustomerById(request.getUserId());
+        Customer customer = getCustomerById(request.getCustomerId());
         Account account = customer.getAccount();
         String pin = account.getPin();
         validatePin(pin, request.getPin());
-        BigDecimal balance = calculateBalance(request.getUserId());
+        BigDecimal balance = calculateBalance(request.getCustomerId());
         checkWhetherBalanceIsSufficient(balance, request.getAmount());
         Transaction transaction = setTransaction(request.getAmount(), TransactionType.WITHDRAW);
         account.getTransactions().add(transaction);
@@ -220,11 +220,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String makeTransfer(TransferRequest request) {
-        Customer customer = getCustomerById(request.getUserId());
+        Customer customer = getCustomerById(request.getCustomerId());
         Account account = customer.getAccount();
         String pin = account.getPin();
         validatePin(pin, request.getPin());
-        BigDecimal balance = calculateBalance(request.getUserId());
+        BigDecimal balance = calculateBalance(request.getCustomerId());
         checkWhetherBalanceIsSufficient(balance, request.getAmount());
         Customer recipient = getCustomerByAccountNumber(request.getRecipientAccountNumber());
         Account recipientAccount = recipient.getAccount();
@@ -270,12 +270,15 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public BigDecimal getBalance(Long userId, String pin) {
-        Customer customer = getCustomerById(userId);
-        String accountPin = customer.getAccount().getPin();
-        if(!accountPin.equals(pin))
-            throw new InvalidDetailsException("Incorrect pin");
-        else return calculateBalance(userId);
+    public BigDecimal getBalance(Long customerId, String pin) {
+        if (customerId != null){
+            Customer customer = getCustomerById(customerId);
+            String accountPin = customer.getAccount().getPin();
+            if(!accountPin.equals(pin))
+                throw new InvalidDetailsException("Incorrect pin");
+            else return calculateBalance(customerId);
+        }
+        throw new E_BankException("field customer id cannot be null");
     }
 
     @Override
@@ -296,8 +299,8 @@ public class CustomerServiceImpl implements CustomerService {
         return "Customer Updated Successfully";
     }
 
-    private BigDecimal calculateBalance(Long userId){
-        Customer customer = getCustomerById(userId);
+    private BigDecimal calculateBalance(Long customerId){
+        Customer customer = getCustomerById(customerId);
         BigDecimal balance = BigDecimal.ZERO;
         List<Transaction> transactions = customer.getAccount().getTransactions();
         for(Transaction transaction : transactions){
@@ -311,8 +314,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String sendRequestPasswordMail(Long userId) {
-        Customer customer = getCustomerById(userId);
+    public String sendRequestPasswordMail(Long customerId) {
+        Customer customer = getCustomerById(customerId);
         String mailTemplate = E_BankUtils.GET_RESET_PASSWORD_MAIL_TEMPLATE;
         String firstName = customer.getFirstName();
         String token = myTokenService.generateAndSaveMyToken(customer);

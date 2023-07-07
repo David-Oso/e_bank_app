@@ -20,9 +20,9 @@ public interface CustomerService {
     String makeDeposit(DepositRequest request);
     String makeWithdraw(WithDrawRequest request);
     String makeTransfer(TransferRequest request);
-    BigDecimal getBalance(Long userId, String pin);
+    BigDecimal getBalance(Long customerId, String pin);
     String updateCustomer(UpdateCustomerRequest request);
-    String sendRequestPasswordMail(Long userId);
+    String sendRequestPasswordMail(Long customerId);
     String resetPassword(ResetPasswordRequest request);
     String uploadImage(UploadImageRequest request);
 }

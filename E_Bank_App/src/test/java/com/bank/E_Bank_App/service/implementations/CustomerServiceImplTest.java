@@ -63,24 +63,24 @@ class CustomerServiceImplTest {
         authenticationRequest.setPassword("Password");
 
         setUpAccountRequest1 = new SetUpAccountRequest();
-        setUpAccountRequest1.setUserId(1L);
+        setUpAccountRequest1.setCustomerId(1L);
         setUpAccountRequest1.setPin("1234");
 
         setUpAccountRequest2 = new SetUpAccountRequest();
-        setUpAccountRequest2.setUserId(2L);
+        setUpAccountRequest2.setCustomerId(2L);
         setUpAccountRequest2.setPin("1245");
 
         depositRequest = new DepositRequest();
-        depositRequest.setUserId(1L);
+        depositRequest.setCustomerId(1L);
         depositRequest.setAmount(BigDecimal.valueOf(50000));
 
         withDrawRequest = new WithDrawRequest();
-        withDrawRequest.setUserId(1L);
+        withDrawRequest.setCustomerId(1L);
         withDrawRequest.setAmount(BigDecimal.valueOf(70000));
         withDrawRequest.setPin("1234");
 
         transferRequest = new TransferRequest();
-        transferRequest.setUserId(1L);
+        transferRequest.setCustomerId(1L);
         transferRequest.setRecipientAccountNumber("9555684342");
         transferRequest.setAmount(BigDecimal.valueOf(20000));
         transferRequest.setPin("1234");

@@ -15,8 +15,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SetUpAccountRequest {
-    @NotNull(message = "field user id cannot be null")
-    private Long userId;
+    @NotNull(message = "field customer id cannot be null")
+    private Long customerId;
 
     @NotNull(message = "field pin cannot be null")
     @NotEmpty(message = "field pin cannot be empty")

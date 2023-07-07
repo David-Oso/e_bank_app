@@ -16,20 +16,18 @@ import java.math.BigDecimal;
 public class WithDrawRequest {
 
     @NotNull(message = "field user id cannot be null")
-    @NotEmpty(message = "field user id cannot be empty")
-    @NotBlank(message = "field user id cannot be blank")
-    private Long userId;
+    private Long customerId;
 
     @NotNull(message = "field amount cannot be null")
     @NotEmpty(message = "field amount cannot be empty")
     @NotBlank(message = "field amount cannot be blank")
+    @Min(value = 200, message = "minimum withdraw amount exceeded")
+    @Max(value = 10000, message = "maximum withdraw amount exceeded")
     @Pattern(regexp= E_BankUtils.AMOUNT_REGEX, message = "enter digit")
     private BigDecimal amount;
 
     @NotNull(message = "field pin cannot be null")
     @NotEmpty(message = "field pin cannot be empty")
     @NotBlank(message = "field pin cannot be blank")
-    @Min(200)
-    @Max(10000)
     private String pin;
 }

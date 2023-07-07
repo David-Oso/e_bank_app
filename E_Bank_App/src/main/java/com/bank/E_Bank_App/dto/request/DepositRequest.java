@@ -15,10 +15,8 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class DepositRequest {
-    @NotNull(message = "field user id cannot be null")
-    @NotEmpty(message = "field user id cannot be empty")
-    @NotBlank(message = "field user id cannot be blank")
-    private Long userId;
+    @NotNull(message = "field customer id cannot be null")
+    private Long customerId;
 
     @NotNull(message = "field amount cannot be null")
     @NotBlank(message = "field amount cannot be blank")
