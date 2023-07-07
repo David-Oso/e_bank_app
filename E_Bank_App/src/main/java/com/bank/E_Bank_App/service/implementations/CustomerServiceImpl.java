@@ -11,6 +11,7 @@ import com.bank.E_Bank_App.exception.NotFoundException;
 import com.bank.E_Bank_App.service.CustomerService;
 import com.bank.E_Bank_App.service.MailService;
 import com.bank.E_Bank_App.service.MyTokenService;
+import com.bank.E_Bank_App.service.cloud.CloudService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -33,6 +34,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final MailService mailService;
     private final MyTokenService myTokenService;
     private final ModelMapper modelMapper;
+    private final CloudService cloudService;
 //    private final PasswordEncoder passwordEncoder;
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -330,6 +332,16 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.save(customer);
         myTokenService.deleteToken(receivedToken.get());
         return "Password reset successful";
+    }
+
+    @Override
+    public String uploadImage(UploadImageRequest request) {
+        Customer customer= getCustomerById(request.getCustomerId());
+        String imageUrl = cloudService.upload(request.getProfileImage());
+//        customer.setImageUrl(imageUrl);
+        customer.setUpdatedAt(LocalDateTime.now());
+        customerRepository.save(customer);
+        return "Profile image uploaded";
     }
 
     private LocalDate convertDateOBirthToLocalDate(String date) {

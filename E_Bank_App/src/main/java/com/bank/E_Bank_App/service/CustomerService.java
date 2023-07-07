@@ -4,6 +4,7 @@ import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
@@ -23,4 +24,5 @@ public interface CustomerService {
     String updateCustomer(UpdateCustomerRequest request);
     String sendRequestPasswordMail(Long userId);
     String resetPassword(ResetPasswordRequest request);
+    String uploadImage(UploadImageRequest request);
 }

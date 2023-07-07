@@ -27,6 +27,7 @@ public class Customer {
     private final Account account = new Account();
     private LocalDate dateOfBirth;
 //    private int age;
+//    private String imageUrl;
     private String password;
     private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
