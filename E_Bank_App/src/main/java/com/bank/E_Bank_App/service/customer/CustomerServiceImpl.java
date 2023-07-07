@@ -374,7 +374,10 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String deleteAllTransactions(Long customerId) {
-        return null;
+        Customer customer = getCustomerById(customerId);
+        List<Transaction> transactions = customer.getAccount().getTransactions();
+        transactions.clear();
+        return "Transactions deleted successfully";
     }
 
     private LocalDate convertDateOBirthToLocalDate(String date) {
