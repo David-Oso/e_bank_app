@@ -254,7 +254,7 @@ public class CustomerServiceImpl implements CustomerService {
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
         String myEmail = "osodavid001@gmail.com";
         String subject = "Transfer Transaction Notification";
-        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, recipientAccountNumber,
+        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, recipientAccountNumber, description,
                 transactionType, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
         mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
     }
