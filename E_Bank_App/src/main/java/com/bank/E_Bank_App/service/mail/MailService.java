@@ -1,4 +1,4 @@
-package com.bank.E_Bank_App.service;
+package com.bank.E_Bank_App.service.mail;
 
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
 

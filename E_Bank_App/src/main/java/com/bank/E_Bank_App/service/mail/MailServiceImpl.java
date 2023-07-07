@@ -1,8 +1,7 @@
-package com.bank.E_Bank_App.service.implementations;
+package com.bank.E_Bank_App.service.mail;
 
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
 import com.bank.E_Bank_App.dto.request.mailRequest.Recipient;
-import com.bank.E_Bank_App.service.MailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

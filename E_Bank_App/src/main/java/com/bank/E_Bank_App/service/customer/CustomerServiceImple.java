@@ -12,8 +12,8 @@
 //import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 //import com.bank.E_Bank_App.dto.response.RegisterResponse;
 //import com.bank.E_Bank_App.exception.*;
-//import com.bank.E_Bank_App.service.MailService;
-//import com.bank.E_Bank_App.service.CustomerService;
+//import com.bank.E_Bank_App.service.mail.MailService;
+//import com.bank.E_Bank_App.service.customer.CustomerService;
 //import com.bank.E_Bank_App.utils.E_BankUtils;
 //import jakarta.validation.constraints.Email;
 //import jakarta.validation.constraints.NotBlank;

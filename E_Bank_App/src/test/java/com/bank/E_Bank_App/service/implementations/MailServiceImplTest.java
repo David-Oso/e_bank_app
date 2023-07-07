@@ -1,6 +1,6 @@
 package com.bank.E_Bank_App.service.implementations;
 
-import com.bank.E_Bank_App.service.MailService;
+import com.bank.E_Bank_App.service.mail.MailService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

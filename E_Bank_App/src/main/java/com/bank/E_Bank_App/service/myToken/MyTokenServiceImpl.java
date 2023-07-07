@@ -1,11 +1,10 @@
-package com.bank.E_Bank_App.service.implementations;
+package com.bank.E_Bank_App.service.myToken;
 
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.MyToken;
 import com.bank.E_Bank_App.data.repository.MyTokenRepository;
 import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
-import com.bank.E_Bank_App.service.MyTokenService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

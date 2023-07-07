@@ -1,4 +1,4 @@
-package com.bank.E_Bank_App.service.implementations;
+package com.bank.E_Bank_App.service.customer;
 
 import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
@@ -8,9 +8,8 @@ import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
 import com.bank.E_Bank_App.exception.NotFoundException;
-import com.bank.E_Bank_App.service.CustomerService;
-import com.bank.E_Bank_App.service.MailService;
-import com.bank.E_Bank_App.service.MyTokenService;
+import com.bank.E_Bank_App.service.mail.MailService;
+import com.bank.E_Bank_App.service.myToken.MyTokenService;
 import com.bank.E_Bank_App.service.cloud.CloudService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import lombok.RequiredArgsConstructor;
@@ -345,6 +344,35 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setUpdatedAt(LocalDateTime.now());
         customerRepository.save(customer);
         return "Profile image uploaded";
+    }
+
+    @Override
+    public Transaction getTransactionById(Long customerId, Long transactionId) {
+        Customer customer = getCustomerById(customerId);
+        List<Transaction> transactions = customer.getAccount().getTransactions();
+        for(Transaction transaction : transactions){
+            if (transaction.getId().equals(transactionId))
+                return transaction;
+        }
+        throw new E_BankException("");
+    }
+
+    @Override
+    public List<Transaction> getAllTransaction(Long customerId) {
+        return null;
+    }
+
+    @Override
+    public void deleteTransaction(Long customerId, Long transactionId) {
+        if(customerId == null)
+            throw new E_BankException("Customer id cannot be null");
+        if(transactionId == null)
+            throw new E_BankException("Transaction id cannot be null");
+    }
+
+    @Override
+    public void deleteAllTransactions(Long customerId) {
+
     }
 
     private LocalDate convertDateOBirthToLocalDate(String date) {

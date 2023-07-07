@@ -1,4 +1,4 @@
-package com.bank.E_Bank_App.service;
+package com.bank.E_Bank_App.service.myToken;
 
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.MyToken;

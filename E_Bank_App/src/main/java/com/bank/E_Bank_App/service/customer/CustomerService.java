@@ -1,12 +1,13 @@
-package com.bank.E_Bank_App.service;
+package com.bank.E_Bank_App.service.customer;
 
 import com.bank.E_Bank_App.data.model.Customer;
+import com.bank.E_Bank_App.data.model.Transaction;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface CustomerService {
     RegisterResponse register(RegisterRequest request);
@@ -25,4 +26,8 @@ public interface CustomerService {
     String sendRequestPasswordMail(Long customerId);
     String resetPassword(ResetPasswordRequest request);
     String uploadImage(UploadImageRequest request);
+    Transaction getTransactionById(Long customerId, Long transactionId);
+    List<Transaction> getAllTransaction(Long customerId);
+    void deleteTransaction(Long customerId, Long transactionId);
+    void deleteAllTransactions(Long customerId);
 }

@@ -5,7 +5,7 @@ import com.bank.E_Bank_App.data.model.Gender;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
-import com.bank.E_Bank_App.service.CustomerService;
+import com.bank.E_Bank_App.service.customer.CustomerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
