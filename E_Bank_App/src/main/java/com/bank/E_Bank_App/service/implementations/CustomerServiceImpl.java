@@ -146,24 +146,28 @@ public class CustomerServiceImpl implements CustomerService {
         Transaction transaction = setTransaction(amount, TransactionType.DEPOSIT);
         account.getTransactions().add(transaction);
         customerRepository.save(customer);
-        sendDepositNotification(customer, amount);
+        sendDepositNotification(customer, amount,false, null);
         return "Transaction Successful";
     }
 
-    private void sendDepositNotification(Customer customer, BigDecimal amount) {
+    private void sendDepositNotification(Customer customer, BigDecimal amount, boolean isTransfer, Customer fromCustomer) {
         String mailTemplate = E_BankUtils.GET_DEPOSIT_NOTIFICATION_MAIL_TEMPLATE;
         String name = customer.getFirstName();
         String accountName = "%s %s".formatted(customer.getFirstName(), customer.getLastName());
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
         String accountNumber = number.replace(2, 8, "********").toString();
-        String description = "Deposit";
+        String transactionType = "Deposit";
+        String description = "";
+        if(isTransfer)
+            description = "Transfer from %s %s".formatted(fromCustomer.getFirstName(), fromCustomer.getLastName());
+        else description = "Deposit into your account";
         String transactionAmount = "₦%s".formatted(amount);
         String transactionDateAndTime = DateTimeFormatter.ofPattern("EEE, dd/MM/yy, hh:mm:ss a").format(LocalDateTime.now());
         String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
         String myEmail = "osodavid001@gmail.com";
         String subject = "Credit Alert Notification";
-        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber,
+        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
         mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
     }
@@ -176,7 +180,6 @@ public class CustomerServiceImpl implements CustomerService {
         validatePin(pin, request.getPin());
         BigDecimal balance = calculateBalance(request.getUserId());
         checkWhetherBalanceIsSufficient(balance, request.getAmount());
-
         Transaction transaction = setTransaction(request.getAmount(), TransactionType.WITHDRAW);
         account.getTransactions().add(transaction);
         customerRepository.save(customer);
@@ -190,14 +193,15 @@ public class CustomerServiceImpl implements CustomerService {
         String accountName = "%s %s".formatted(customer.getFirstName(), customer.getLastName());
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
         String accountNumber = number.replace(2, 8, "********").toString();
-        String description = "Withdraw";
+        String transactionType = "Withdraw";
+        String description = "Withdrawal from bank";
         String transactionAmount = "₦%s".formatted(amount);
         String transactionDateAndTime = DateTimeFormatter.ofPattern("EEE, dd/MM/yy, hh:mm:ss a").format(LocalDateTime.now());
         String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
         String myEmail = "osodavid001@gmail.com";
         String subject = "Debit Alert Notification";
-        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber,
+        String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
         mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
     }
@@ -232,7 +236,7 @@ public class CustomerServiceImpl implements CustomerService {
         recipientAccount.getTransactions().add(transaction);
         customerRepository.save(recipient);
         sendTransferNotificationMail(customer, request.getAmount(), recipientAccount.getAccountNumber());
-        sendDepositNotification(recipient, request.getAmount());
+        sendDepositNotification(recipient, request.getAmount(), true, recipient);
         return "Transaction Successful";
     }
 
@@ -243,7 +247,8 @@ public class CustomerServiceImpl implements CustomerService {
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
         String accountNumber = number.replace(2, 8, "********").toString();
         String recipientAccountNumber = new StringBuilder(toAccountNumber).replace(2, 8, "********").toString();
-        String description = "Transfer";
+        String transactionType = "Transfer";
+        String description = "Transfer to account number %s".formatted(toAccountNumber);
         String transactionAmount = "₦%s".formatted(amount);
         String transactionDateAndTime = DateTimeFormatter.ofPattern("EEE, dd/MM/yy, hh:mm:ss a").format(LocalDateTime.now());
         String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
@@ -251,7 +256,7 @@ public class CustomerServiceImpl implements CustomerService {
         String myEmail = "osodavid001@gmail.com";
         String subject = "Transfer Transaction Notification";
         String htmlContent = String.format(mailTemplate, name, accountName, accountNumber, recipientAccountNumber,
-                description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
+                transactionType, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
         mailService.sendHtmlMail(name, customer.getEmail(), subject, htmlContent);
     }
 
