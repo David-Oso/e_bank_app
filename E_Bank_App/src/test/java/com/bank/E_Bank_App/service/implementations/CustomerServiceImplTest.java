@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.bank.E_Bank_App.utils.E_BankUtils.TEST_IMAGE_LOCATION;
@@ -252,7 +251,13 @@ class CustomerServiceImplTest {
 
     @Test
     void getAllTransactionsTest(){
-        List<Transaction> transactions = customerService.getAllTransactions(1L);
+        List<Transaction> transactions = customerService.getAllTransactionsByCustomerId(1L);
         assertThat(transactions).isNotNull();
+    }
+
+    @Test
+    void deleteTransactionByIdTest(){
+        String response = customerService.deleteTransactionByCustomerIdAndTransactionId(2L, 1L);
+        assertThat(response).isEqualTo("Transaction deleted");
     }
 }

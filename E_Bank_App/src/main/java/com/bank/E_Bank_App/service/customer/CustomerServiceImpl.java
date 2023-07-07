@@ -358,13 +358,13 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Transaction> getAllTransactions(Long customerId) {
+    public List<Transaction> getAllTransactionsByCustomerId(Long customerId) {
         Customer customer = getCustomerById(customerId);
         return customer.getAccount().getTransactions();
     }
 
     @Override
-    public String deleteTransaction(Long customerId, Long transactionId) {
+    public String deleteTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId) {
         Customer customer = getCustomerById(customerId);
         List<Transaction> transactions = customer.getAccount().getTransactions();
         transactions.removeIf(transact ->
@@ -373,7 +373,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String deleteAllTransactions(Long customerId) {
+    public String deleteAllTransactionsByCustomerId(Long customerId) {
         Customer customer = getCustomerById(customerId);
         List<Transaction> transactions = customer.getAccount().getTransactions();
         transactions.clear();
