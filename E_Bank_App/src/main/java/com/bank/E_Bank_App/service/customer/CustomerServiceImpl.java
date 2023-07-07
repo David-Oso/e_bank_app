@@ -354,12 +354,13 @@ public class CustomerServiceImpl implements CustomerService {
             if (transaction.getId().equals(transactionId))
                 return transaction;
         }
-        throw new E_BankException("");
+        throw new E_BankException("Transaction not found");
     }
 
     @Override
     public List<Transaction> getAllTransaction(Long customerId) {
-        return null;
+        Customer customer = getCustomerById(customerId);
+        return customer.getAccount().getTransactions();
     }
 
     @Override

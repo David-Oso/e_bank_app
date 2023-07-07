@@ -2,6 +2,8 @@ package com.bank.E_Bank_App.service.implementations;
 
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
+import com.bank.E_Bank_App.data.model.Transaction;
+import com.bank.E_Bank_App.data.model.TransactionType;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
@@ -10,9 +12,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
+import static com.bank.E_Bank_App.utils.E_BankUtils.TEST_IMAGE_LOCATION;
 import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class CustomerServiceImplTest {
@@ -24,6 +32,7 @@ class CustomerServiceImplTest {
     private AuthenticationRequest authenticationRequest;
     private SetUpAccountRequest setUpAccountRequest1;
     private SetUpAccountRequest setUpAccountRequest2;
+    private UploadImageRequest uploadImageRequest;
     private DepositRequest depositRequest;
     private WithDrawRequest withDrawRequest;
     private TransferRequest transferRequest;
@@ -99,6 +108,21 @@ class CustomerServiceImplTest {
         resetPasswordRequest.setToken("8B-doU-w");
         resetPasswordRequest.setNewPassword("NewPassword");
         resetPasswordRequest.setConfirmPassword("NewPassword");
+
+        uploadImageRequest = new UploadImageRequest();
+        uploadImageRequest.setCustomerId(1L);
+        uploadImageRequest.setProfileImage(uploadTestImageFile(TEST_IMAGE_LOCATION));
+    }
+
+    private MultipartFile uploadTestImageFile(String imageUrl){
+        MultipartFile file = null;
+        try{
+            file =  new MockMultipartFile("test_upload_image",
+                    new FileInputStream(imageUrl));
+        }catch (IOException exception){
+            System.out.println(exception.getMessage());
+        }
+        return file;
     }
 
     @Test
@@ -209,5 +233,19 @@ class CustomerServiceImplTest {
     void resetPasswordTest(){
         String response = customerService.resetPassword(resetPasswordRequest);
         assertThat(response).isEqualTo("Password reset successful");
+    }
+
+    @Test
+    void uploadImageTest(){
+        String response = customerService.uploadImage(uploadImageRequest);
+        assertThat(response).isEqualTo("Profile image uploaded");
+    }
+
+    @Test
+    void getTransactionById(){
+        Transaction transaction = customerService.getTransactionById(1L, 1L);
+        assertThat(transaction.getAmount()).isEqualTo(BigDecimal.valueOf(50000.00));
+        assertThat(transaction.getTransactionType()).isEqualTo(TransactionType.DEPOSIT);
+//        assertThat(transaction.getTransactionTime()).isEqualTo(LocalDateTime.parse("2023-07-05 15:58:22.708181"));
     }
 }
