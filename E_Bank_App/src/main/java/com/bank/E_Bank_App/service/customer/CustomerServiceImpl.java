@@ -364,16 +364,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void deleteTransaction(Long customerId, Long transactionId) {
-        if(customerId == null)
-            throw new E_BankException("Customer id cannot be null");
-        if(transactionId == null)
-            throw new E_BankException("Transaction id cannot be null");
+    public String deleteTransaction(Long customerId, Long transactionId) {
+        Customer customer = getCustomerById(customerId);
+        List<Transaction> transactions = customer.getAccount().getTransactions();
+        transactions.removeIf(transact ->
+                transact.getId().equals(transactionId));
+        return "Transaction deleted";
     }
 
     @Override
-    public void deleteAllTransactions(Long customerId) {
-
+    public String deleteAllTransactions(Long customerId) {
+        return null;
     }
 
     private LocalDate convertDateOBirthToLocalDate(String date) {

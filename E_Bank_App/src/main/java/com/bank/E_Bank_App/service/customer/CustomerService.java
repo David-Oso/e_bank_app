@@ -28,6 +28,6 @@ public interface CustomerService {
     String uploadImage(UploadImageRequest request);
     Transaction getTransactionById(Long customerId, Long transactionId);
     List<Transaction> getAllTransaction(Long customerId);
-    void deleteTransaction(Long customerId, Long transactionId);
-    void deleteAllTransactions(Long customerId);
+    String deleteTransaction(Long customerId, Long transactionId);
+    String deleteAllTransactions(Long customerId);
 }
