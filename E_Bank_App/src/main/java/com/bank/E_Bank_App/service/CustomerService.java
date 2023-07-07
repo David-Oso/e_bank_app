@@ -16,7 +16,7 @@ public interface CustomerService {
     Customer getCustomerByEmail(String email);
     Customer getCustomerByAccountNumber(String accountNumber);
     String setUpAccount(SetUpAccountRequest request);
-    String makeDeposit(Long userId, BigDecimal amount);
+    String makeDeposit(DepositRequest request);
     String makeWithdraw(WithDrawRequest request);
     String makeTransfer(TransferRequest request);
     BigDecimal getBalance(Long userId, String pin);

@@ -138,15 +138,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String makeDeposit(Long userId, BigDecimal amount) {
-        if(amount == null)
-            throw new E_BankException("amount cannot be empty");
-        Customer customer = getCustomerById(userId);
+    public String makeDeposit(DepositRequest request) {
+
+        Customer customer = getCustomerById(request.getUserId());
         Account account = customer.getAccount();
-        Transaction transaction = setTransaction(amount, TransactionType.DEPOSIT);
+        Transaction transaction = setTransaction(request.getAmount(), TransactionType.DEPOSIT);
         account.getTransactions().add(transaction);
         customerRepository.save(customer);
-        sendDepositNotification(customer, amount,false, null);
+        sendDepositNotification(customer, request.getAmount(),false, null);
         return "Transaction Successful";
     }
 
