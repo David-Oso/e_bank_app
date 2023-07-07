@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.bank.E_Bank_App.utils.E_BankUtils.TEST_IMAGE_LOCATION;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -242,10 +243,16 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void getTransactionById(){
+    void getTransactionByIdTest(){
         Transaction transaction = customerService.getTransactionById(1L, 1L);
         assertThat(transaction.getAmount()).isEqualTo(BigDecimal.valueOf(50000.00));
         assertThat(transaction.getTransactionType()).isEqualTo(TransactionType.DEPOSIT);
 //        assertThat(transaction.getTransactionTime()).isEqualTo(LocalDateTime.parse("2023-07-05 15:58:22.708181"));
+    }
+
+    @Test
+    void getAllTransactionsTest(){
+        List<Transaction> transactions = customerService.getAllTransactions(1L);
+        assertThat(transactions).isNotNull();
     }
 }

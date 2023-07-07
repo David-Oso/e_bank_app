@@ -358,7 +358,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Transaction> getAllTransaction(Long customerId) {
+    public List<Transaction> getAllTransactions(Long customerId) {
         Customer customer = getCustomerById(customerId);
         return customer.getAccount().getTransactions();
     }
