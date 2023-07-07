@@ -24,6 +24,7 @@ class CustomerServiceImplTest {
     private AuthenticationRequest authenticationRequest;
     private SetUpAccountRequest setUpAccountRequest1;
     private SetUpAccountRequest setUpAccountRequest2;
+    private DepositRequest depositRequest;
     private WithDrawRequest withDrawRequest;
     private TransferRequest transferRequest;
     private UpdateCustomerRequest updateCustomerRequest;
@@ -68,6 +69,10 @@ class CustomerServiceImplTest {
         setUpAccountRequest2 = new SetUpAccountRequest();
         setUpAccountRequest2.setUserId(2L);
         setUpAccountRequest2.setPin("1245");
+
+        depositRequest = new DepositRequest();
+        depositRequest.setUserId(1L);
+        depositRequest.setAmount(BigDecimal.valueOf(50000));
 
         withDrawRequest = new WithDrawRequest();
         withDrawRequest.setUserId(1L);
@@ -157,7 +162,7 @@ class CustomerServiceImplTest {
 
     @Test
     void makeDepositTest(){
-        String response = customerService.makeDeposit(1L, BigDecimal.valueOf(50000));
+        String response = customerService.makeDeposit(depositRequest);
         assertThat(response).isEqualTo("Transaction Successful");
     }
 
