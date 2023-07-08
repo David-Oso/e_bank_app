@@ -6,6 +6,7 @@ import com.bank.E_Bank_App.data.model.Role;
 import com.bank.E_Bank_App.data.repository.AdminRepository;
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.service.AdminService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AdminServiceImpl implements AdminService{
+public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
 
     @Value("${adminId}")
@@ -57,7 +58,7 @@ public class AdminServiceImpl implements AdminService{
 
 
     @Override
-    public AuthenticationResponse login(AdminLoginRequest request) {
+    public AuthenticationResponse adminLogin(AdminLoginRequest request) {
         return null;
     }
 }

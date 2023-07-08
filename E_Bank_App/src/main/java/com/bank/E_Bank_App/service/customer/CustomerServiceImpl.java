@@ -36,13 +36,13 @@ public class CustomerServiceImpl implements CustomerService {
     private final CloudService cloudService;
     //    private final PasswordEncoder passwordEncoder;
     @Override
-    public RegisterResponse register(RegisterRequest request) {
-        checkIfEmailAlreadyExists(request.getEmail());
-        Customer customer = getSavedCustomer(request);
+    public RegisterResponse register(RegisterRequest registerRequest) {
+        checkIfEmailAlreadyExists(registerRequest.getEmail());
+        Customer customer = getSavedCustomer(registerRequest);
         String token = myTokenService.generateAndSaveMyToken(customer);
         int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
         customer.setAge(age);
-        customer.setGender(request.getGender());
+        customer.setGender(registerRequest.getGender());
         customerRepository.save(customer);
         sendVerificationMail(customer, token);
         return RegisterResponse.builder()
@@ -52,11 +52,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String verifyEmail(EmailVerificationRequest request) {
-        Customer registeredCustomer = getCustomerByEmail(request.getEmail());
+    public String verifyEmail(EmailVerificationRequest emailVerificationRequest) {
+        Customer registeredCustomer = getCustomerByEmail(emailVerificationRequest.getEmail());
         AppUser appUser = registeredCustomer.getAppUser();
         if(!appUser.isLocked()){
-            Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(request.getToken(), registeredCustomer);
+            Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(emailVerificationRequest.getToken(), registeredCustomer);
             appUser.setEnable(true);
             customerRepository.save(registeredCustomer);
             myTokenService.deleteToken(receivedToken.get());
@@ -70,13 +70,14 @@ public class CustomerServiceImpl implements CustomerService {
         if(isPresent){
             Customer customer = customerRepository.findByAppUser_Email(email).get();
             AppUser appUser = customer.getAppUser();
-            if(!appUser.isEnable())resendVerificationMail(customer);
+            if(!appUser.isEnable())resendVerificationMail(customer.getId());
             else if (appUser.isLocked())
                 throw new E_BankException("Account has been locked for some time");
         }
     }
     @Override
-    public void resendVerificationMail(Customer customer) {
+    public void resendVerificationMail(Long customerId) {
+        Customer customer = getCustomerById(customerId);
         String token = myTokenService.generateAndSaveMyToken(customer);
         sendVerificationMail(customer, token);
     }
@@ -94,10 +95,10 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        Customer customer = getCustomerByEmail(request.getEmail());
+    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
+        Customer customer = getCustomerByEmail(authenticationRequest.getEmail());
         AppUser appUser = customer.getAppUser();
-        if(!appUser.getPassword().equals(request.getPassword()))
+        if(!appUser.getPassword().equals(authenticationRequest.getPassword()))
             throw new InvalidDetailsException("Incorrect Password");
         else return AuthenticationResponse.builder()
                 .message("Authentication successful")
@@ -124,8 +125,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String setUpAccount(SetUpAccountRequest request) {
-        Customer customer = getCustomerById(request.getCustomerId());
+    public String setUpAccount(SetUpAccountRequest setUpAccountRequest) {
+        Customer customer = getCustomerById(setUpAccountRequest.getCustomerId());
         String firstName = customer.getAppUser().getFirstName();
         String lastName = customer.getAppUser().getLastName();
         Account account = customer.getAccount();
@@ -134,7 +135,7 @@ public class CustomerServiceImpl implements CustomerService {
         String accountNumber = generateAccountNumber();
         account.setAccountName(accountName);
         account.setAccountNumber(accountNumber);
-        account.setPin(request.getPin());
+        account.setPin(setUpAccountRequest.getPin());
         customerRepository.save(customer);
         return "Account is set up";
     }
@@ -147,14 +148,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String makeDeposit(DepositRequest request) {
+    public String makeDeposit(DepositRequest depositRequest) {
 
-        Customer customer = getCustomerById(request.getCustomerId());
+        Customer customer = getCustomerById(depositRequest.getCustomerId());
         Account account = customer.getAccount();
-        Transaction transaction = setTransaction(request.getAmount(), TransactionType.DEPOSIT);
+        Transaction transaction = setTransaction(depositRequest.getAmount(), TransactionType.DEPOSIT);
         account.getTransactions().add(transaction);
         customerRepository.save(customer);
-        sendDepositNotification(customer, request.getAmount(),false, null);
+        sendDepositNotification(customer, depositRequest.getAmount(),false, null);
         return "Transaction Successful";
     }
 
@@ -185,17 +186,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String makeWithdraw(WithDrawRequest request) {
-        Customer customer = getCustomerById(request.getCustomerId());
+    public String makeWithdraw(WithDrawRequest withDrawRequest) {
+        Customer customer = getCustomerById(withDrawRequest.getCustomerId());
         Account account = customer.getAccount();
         String pin = account.getPin();
-        validatePin(pin, request.getPin());
-        BigDecimal balance = calculateBalance(request.getCustomerId());
-        checkWhetherBalanceIsSufficient(balance, request.getAmount());
-        Transaction transaction = setTransaction(request.getAmount(), TransactionType.WITHDRAW);
+        validatePin(pin, withDrawRequest.getPin());
+        BigDecimal balance = calculateBalance(withDrawRequest.getCustomerId());
+        checkWhetherBalanceIsSufficient(balance, withDrawRequest.getAmount());
+        Transaction transaction = setTransaction(withDrawRequest.getAmount(), TransactionType.WITHDRAW);
         account.getTransactions().add(transaction);
         customerRepository.save(customer);
-        sendWithdrawNotificationMail(customer, request.getAmount());
+        sendWithdrawNotificationMail(customer, withDrawRequest.getAmount());
         return "Transaction Successful";
     }
 
@@ -232,25 +233,25 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String makeTransfer(TransferRequest request) {
-        Customer customer = getCustomerById(request.getCustomerId());
+    public String makeTransfer(TransferRequest transferRequest) {
+        Customer customer = getCustomerById(transferRequest.getCustomerId());
         Account account = customer.getAccount();
         String pin = account.getPin();
-        validatePin(pin, request.getPin());
-        BigDecimal balance = calculateBalance(request.getCustomerId());
-        checkWhetherBalanceIsSufficient(balance, request.getAmount());
-        Customer recipient = getCustomerByAccountNumber(request.getRecipientAccountNumber());
+        validatePin(pin, transferRequest.getPin());
+        BigDecimal balance = calculateBalance(transferRequest.getCustomerId());
+        checkWhetherBalanceIsSufficient(balance, transferRequest.getAmount());
+        Customer recipient = getCustomerByAccountNumber(transferRequest.getRecipientAccountNumber());
         Account recipientAccount = recipient.getAccount();
 
-        Transaction transaction = setTransaction(request.getAmount(), TransactionType.TRANSFER);
+        Transaction transaction = setTransaction(transferRequest.getAmount(), TransactionType.TRANSFER);
         account.getTransactions().add(transaction);
         customerRepository.save(customer);
 
         transaction.setTransactionType(TransactionType.DEPOSIT);
         recipientAccount.getTransactions().add(transaction);
         customerRepository.save(recipient);
-        sendTransferNotificationMail(customer, request.getAmount(), recipientAccount.getAccountNumber());
-        sendDepositNotification(recipient, request.getAmount(), true, recipient);
+        sendTransferNotificationMail(customer, transferRequest.getAmount(), recipientAccount.getAccountNumber());
+        sendDepositNotification(recipient, transferRequest.getAmount(), true, recipient);
         return "Transaction Successful";
     }
 
@@ -297,19 +298,19 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String updateCustomer(UpdateCustomerRequest request) {
-        Customer customer = getCustomerById(request.getUserId());
+    public String updateCustomer(UpdateCustomerRequest updateCustomerRequest) {
+        Customer customer = getCustomerById(updateCustomerRequest.getUserId());
         AppUser appUser = customer.getAppUser();
-        if(!appUser.getPassword().equals(request.getPassword()))
+        if(!appUser.getPassword().equals(updateCustomerRequest.getPassword()))
             throw new InvalidDetailsException("Incorrect password");
-        appUser.setFirstName(request.getFirstName());
-        appUser.setLastName(request.getLastName());
-        customer.setGender(request.getGender());
-        LocalDate dateOfBirth = convertDateOBirthToLocalDate(request.getDateOfBirth());
+        appUser.setFirstName(updateCustomerRequest.getFirstName());
+        appUser.setLastName(updateCustomerRequest.getLastName());
+        customer.setGender(updateCustomerRequest.getGender());
+        LocalDate dateOfBirth = convertDateOBirthToLocalDate(updateCustomerRequest.getDateOfBirth());
         int age = changeDateToIntAndValidateAge(dateOfBirth);
         customer.setDateOfBirth(dateOfBirth);
         customer.setAge(age);
-        appUser.setPassword(request.getNewPassword());
+        appUser.setPassword(updateCustomerRequest.getNewPassword());
         customer.setUpdatedAt(LocalDateTime.now());
         customerRepository.save(customer);
         return "Customer Updated Successfully";
@@ -342,12 +343,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String resetPassword(ResetPasswordRequest request) {
-        Customer customer = getCustomerByEmail(request.getEmail());
+    public String resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        Customer customer = getCustomerByEmail(resetPasswordRequest.getEmail());
         AppUser appUser = customer.getAppUser();
-        Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(request.getToken(), customer);
-        appUser.setPassword(request.getNewPassword());
-        if(!appUser.getPassword().equals(request.getConfirmPassword()))
+        Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(resetPasswordRequest.getToken(), customer);
+        appUser.setPassword(resetPasswordRequest.getNewPassword());
+        if(!appUser.getPassword().equals(resetPasswordRequest.getConfirmPassword()))
             throw new InvalidDetailsException("Password doesn't match");
         customerRepository.save(customer);
         myTokenService.deleteToken(receivedToken.get());
@@ -355,9 +356,9 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String uploadImage(UploadImageRequest request) {
-        Customer customer= getCustomerById(request.getCustomerId());
-        String imageUrl = cloudService.upload(request.getProfileImage());
+    public String uploadImage(UploadImageRequest uploadImageRequest) {
+        Customer customer= getCustomerById(uploadImageRequest.getCustomerId());
+        String imageUrl = cloudService.upload(uploadImageRequest.getProfileImage());
         customer.setImageUrl(imageUrl);
         customer.setUpdatedAt(LocalDateTime.now());
         customerRepository.save(customer);
