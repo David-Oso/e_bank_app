@@ -1,9 +1,6 @@
 package com.bank.E_Bank_App.service.implementations;
 
-import com.bank.E_Bank_App.data.model.Customer;
-import com.bank.E_Bank_App.data.model.Gender;
-import com.bank.E_Bank_App.data.model.Transaction;
-import com.bank.E_Bank_App.data.model.TransactionType;
+import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
@@ -160,20 +157,24 @@ class CustomerServiceImplTest {
     @Test
     void getCustomerById() {
         Customer foundCustomer = customerService.getCustomerById(1L);
-        assertThat(foundCustomer.getEmail()).isEqualTo(registerRequest1.getEmail());
+        String email = foundCustomer.getAppUser().getEmail();
+        assertThat(email).isEqualTo(registerRequest1.getEmail());
     }
 
     @Test
     void getCustomerByEmail() {
         Customer foundCustomer = customerService.getCustomerByEmail("osodavid001@gmail.com");
-        assertThat(foundCustomer.getFirstName()).isEqualTo("Dave");
-        assertThat(foundCustomer.getLastName()).isEqualTo("Temz");
+        String firstName = foundCustomer.getAppUser().getFirstName();
+        String lastName = foundCustomer.getAppUser().getLastName();
+        assertThat(firstName).isEqualTo("Dave");
+        assertThat(lastName).isEqualTo("Temz");
     }
 
     @Test
     void getCustomerByAccountNumberTest(){
         Customer foundCustomer = customerService.getCustomerByAccountNumber("9872958385");
-        assertThat(foundCustomer.getEmail()).isEqualTo(registerRequest1.getEmail());
+        String email = foundCustomer.getAppUser().getEmail();
+        assertThat(email).isEqualTo(registerRequest1.getEmail());
     }
 
     @Test

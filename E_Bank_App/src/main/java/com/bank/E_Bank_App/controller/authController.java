@@ -4,9 +4,12 @@ import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
 import com.bank.E_Bank_App.dto.request.AuthenticationRequest;
 import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
+import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,19 +23,23 @@ public class authController {
 
     @PostMapping("user/register")
     public ResponseEntity<?> registerCustomer(@Valid @RequestBody RegisterRequest registerRequest){
-        return null;
+        RegisterResponse registerResponse = customerService.register(registerRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(registerResponse);
     }
     @PostMapping("verify")
     public ResponseEntity<?> verify(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest){
-        return null;
+        String verificationResponse = customerService.verifyEmail(emailVerificationRequest);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(verificationResponse);
     }
     @PostMapping("customer/login")
     public ResponseEntity<?>  customerLogin(@Valid @RequestBody AuthenticationRequest authenticationRequest){
-        return null;
+        AuthenticationResponse loginResponse = customerService.authenticate(authenticationRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
     }
 
     @PostMapping("admin/login")
     public ResponseEntity<?> adminLogin(@Valid @RequestBody AdminLoginRequest adminLoginRequest){
+
         return null;
     }
 
