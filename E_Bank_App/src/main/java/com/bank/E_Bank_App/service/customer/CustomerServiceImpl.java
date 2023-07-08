@@ -70,16 +70,21 @@ public class CustomerServiceImpl implements CustomerService {
         if(isPresent){
             Customer customer = customerRepository.findByAppUser_Email(email).get();
             AppUser appUser = customer.getAppUser();
-            if(!appUser.isEnable())resendVerificationMail(customer.getId());
+            if(!appUser.isEnable()) sendVerificationMail(customer.getId());
             else if (appUser.isLocked())
                 throw new E_BankException("Account has been locked for some time");
         }
     }
     @Override
-    public void resendVerificationMail(Long customerId) {
+    public void sendVerificationMail(Long customerId) {
         Customer customer = getCustomerById(customerId);
         String token = myTokenService.generateAndSaveMyToken(customer);
         sendVerificationMail(customer, token);
+    }
+
+    @Override
+    public void resendVerificationMail(Long customerId) {
+        sendVerificationMail(customerId);
     }
 
     private Customer getSavedCustomer(RegisterRequest request) {

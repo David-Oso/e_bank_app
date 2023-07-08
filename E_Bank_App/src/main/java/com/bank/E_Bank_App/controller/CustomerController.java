@@ -1,9 +1,11 @@
 package com.bank.E_Bank_App.controller;
 
+import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +17,20 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping("get/{customer_id}")
-    public ResponseEntity<?> getCustomerById(@Valid @PathVariable Long customer_id){
-        return null;
+    public ResponseEntity<?> getCustomerById(@Valid @PathVariable Long customer_id) {
+        Customer customer = customerService.getCustomerById(customer_id);
+        return ResponseEntity.status(HttpStatus.OK).body(customer);
     }
 
     @GetMapping("get/email")
     public ResponseEntity<?> getCustomerByEmail(@Valid @RequestParam String email){
-        return null;
+        Customer customer = customerService.getCustomerByEmail(email);
+        return ResponseEntity.status(HttpStatus.OK).body(customer);
     }
     @GetMapping("get/account_number")
     public ResponseEntity<?> getCustomerByAccountNumber(@Valid @RequestParam String accountNumber){
-        return null;
+        Customer customer = customerService.getCustomerByAccountNumber(accountNumber);
+        return ResponseEntity.status(HttpStatus.OK).body(customer);
     }
     @PostMapping("set_up/account")
     public ResponseEntity<?> setUpAccount(@Valid @RequestBody SetUpAccountRequest setUpAccountRequest){

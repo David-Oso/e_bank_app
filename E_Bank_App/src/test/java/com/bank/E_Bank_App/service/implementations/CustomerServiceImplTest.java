@@ -134,10 +134,14 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void resendVerificationMailTest() {
-//        customerService.resendVerificationMail();
+    void sendVerificationMailTest(){
+        customerService.sendVerificationMail(2L);
     }
 
+    @Test
+    void resendVerificationMailTest(){
+        customerService.resendVerificationMail(2L);
+    }
     @Test
     void verifyEmailTest(){
         String response1 = customerService.verifyEmail(emailVerificationRequest1);

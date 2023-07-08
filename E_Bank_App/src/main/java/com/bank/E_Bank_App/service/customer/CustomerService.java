@@ -12,6 +12,7 @@ import java.util.List;
 public interface CustomerService {
     RegisterResponse register(RegisterRequest registerRequest);
     String verifyEmail(EmailVerificationRequest emailVerificationRequest);
+    void sendVerificationMail(Long customerId);
     void resendVerificationMail(Long customerId);
     AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest);
     Customer getCustomerById(Long customerId);

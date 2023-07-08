@@ -58,7 +58,7 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
-    public AuthenticationResponse adminLogin(AdminLoginRequest request) {
+    public AuthenticationResponse authenticate(AdminLoginRequest request) {
         return null;
     }
 }
