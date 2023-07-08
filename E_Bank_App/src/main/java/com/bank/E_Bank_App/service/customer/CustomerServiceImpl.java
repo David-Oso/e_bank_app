@@ -87,6 +87,7 @@ public class CustomerServiceImpl implements CustomerService {
         LocalDate dateOfBirth = convertDateOBirthToLocalDate(request.getDateOfBirth());
 //        String encodedPassword = passwordEncoder.encode(request.getPassword());
 //        appUser.setPassword(encodedPassword);
+        appUser.setRole(Role.CUSTOMER);
         appUser.setPassword(request.getPassword());
         customer.setDateOfBirth(dateOfBirth);
         return customerRepository.save(customer);
