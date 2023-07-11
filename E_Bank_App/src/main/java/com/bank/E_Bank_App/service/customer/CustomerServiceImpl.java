@@ -12,6 +12,7 @@ import com.bank.E_Bank_App.service.mail.MailService;
 import com.bank.E_Bank_App.service.myToken.MyTokenService;
 import com.bank.E_Bank_App.service.cloud.CloudService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final MailService mailService;
@@ -65,12 +66,13 @@ public class CustomerServiceImpl implements CustomerService {
         throw new E_BankException("Error verifying email");
     }
 
+
     private void checkIfEmailAlreadyExists(String email) {
         boolean isPresent = customerRepository.findByAppUser_Email(email).isPresent();
         if(isPresent){
             Customer customer = customerRepository.findByAppUser_Email(email).get();
             AppUser appUser = customer.getAppUser();
-            if(!appUser.isEnable()) sendVerificationMail(customer.getId());
+            if(!appUser.isEnable()) resendVerificationMail(customer.getId());
             else if (appUser.isLocked())
                 throw new E_BankException("Account has been locked for some time");
         }
@@ -96,7 +98,7 @@ public class CustomerServiceImpl implements CustomerService {
         appUser.setRole(Role.CUSTOMER);
         appUser.setPassword(request.getPassword());
         customer.setDateOfBirth(dateOfBirth);
-        return customerRepository.save(customer);
+        return customer;
     }
 
     @Override

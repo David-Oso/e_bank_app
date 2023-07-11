@@ -5,6 +5,7 @@ import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
 import com.bank.E_Bank_App.exception.NotFoundException;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,9 +20,9 @@ import org.springframework.context.annotation.Configuration;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class AppConfig {
-    private final CustomerRepository customerRepository;
+//    private final CustomerRepository customerRepository;
     @Value("${cloudinary.cloud.name}")
     private String cloudName;
     @Value("${cloudinary.api.key}")

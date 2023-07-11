@@ -29,7 +29,8 @@ public class E_BankUtils {
     private static final String WITHDRAW_NOTIFICATION_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\withdrawNotificationMail.html";
     private static final String TRANSFER_NOTIFICATION_MAIL_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\transferNotificationMail.html";
     public static final String TEST_IMAGE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\static\\test.jpg";
-    public static String getTemplate(String templateLocation){
+
+    private static String getTemplate(String templateLocation){
         try(BufferedReader reader =
                     new BufferedReader(new FileReader(templateLocation))){
             return reader.lines().collect(Collectors.joining());

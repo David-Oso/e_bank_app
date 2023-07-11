@@ -6,7 +6,6 @@ import com.bank.E_Bank_App.data.model.Role;
 import com.bank.E_Bank_App.data.repository.AdminRepository;
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
-import com.bank.E_Bank_App.service.AdminService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +33,6 @@ public class AdminServiceImpl implements AdminService {
 
     @Value("${adminPassword}")
     private String adminPassword;
-
 
     @PostConstruct
     public void registerAdmin(){

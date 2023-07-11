@@ -6,6 +6,7 @@ import com.bank.E_Bank_App.dto.request.EmailVerificationRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
+import com.bank.E_Bank_App.service.admin.AdminService;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 public class authController {
     private final CustomerService customerService;
-//    private final AdminService adminService;
+    private final AdminService adminService;
 
     private final String mailResponse = "Check your mail to continue your registration";
     @PostMapping("user/register")
@@ -40,9 +41,8 @@ public class authController {
 
     @PostMapping("admin/login")
     public ResponseEntity<?> adminLogin(@Valid @RequestBody AdminLoginRequest adminLoginRequest){
-//        AuthenticationResponse adminLoginResponse = adminService.authenticate(adminLoginRequest);
-//        return ResponseEntity.status(HttpStatus.OK).body(adminLoginResponse);
-        return null;
+        AuthenticationResponse adminLoginResponse = adminService.authenticate(adminLoginRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(adminLoginResponse);
     }
 
     @PostMapping("send_verification_mail/{customer_id}")
