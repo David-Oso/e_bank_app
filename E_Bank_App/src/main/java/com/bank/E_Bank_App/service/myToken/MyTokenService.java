@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface MyTokenService {
     String generateAndSaveMyToken(Customer customer);
-    Optional<MyToken> validateReceivedToken(String token, Customer customer);
+    Optional<MyToken> validateReceivedToken(String token);
     void deleteToken(MyToken myToken);
+//    Customer getCustomerByToken(String token);
 }

@@ -54,13 +54,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String verifyEmail(EmailVerificationRequest emailVerificationRequest) {
-        Customer registeredCustomer = getCustomerByEmail(emailVerificationRequest.getEmail());
-        AppUser appUser = registeredCustomer.getAppUser();
+        MyToken myToken = myTokenService.
+                validateReceivedToken(emailVerificationRequest.getToken()).get();
+        Customer customer = myToken.getCustomer();
+        AppUser appUser = customer.getAppUser();
         if(!appUser.isLocked()){
-            Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(emailVerificationRequest.getToken(), registeredCustomer);
             appUser.setEnable(true);
-            customerRepository.save(registeredCustomer);
-            myTokenService.deleteToken(receivedToken.get());
+            customerRepository.save(customer);
+            myTokenService.deleteToken(myToken);
             return "Verification successful";
         }
         throw new E_BankException("Error verifying email");
@@ -353,7 +354,7 @@ public class CustomerServiceImpl implements CustomerService {
     public String resetPassword(ResetPasswordRequest resetPasswordRequest) {
         Customer customer = getCustomerByEmail(resetPasswordRequest.getEmail());
         AppUser appUser = customer.getAppUser();
-        Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(resetPasswordRequest.getToken(), customer);
+        Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(resetPasswordRequest.getToken());
         appUser.setPassword(resetPasswordRequest.getNewPassword());
         if(!appUser.getPassword().equals(resetPasswordRequest.getConfirmPassword()))
             throw new InvalidDetailsException("Password doesn't match");

@@ -29,15 +29,14 @@ public class MyTokenServiceImpl implements MyTokenService {
     }
 
     @Override
-    public Optional<MyToken> validateReceivedToken(String token, Customer customer) {
-        Optional<MyToken> receivedToken = myTokenRepository
-                .findMyTokenByCustomerAndToken(customer, token);
-        if(receivedToken.isEmpty())throw new InvalidDetailsException("Invalid token");
-        else if(receivedToken.get().getExpirationTime().isBefore(LocalDateTime.now())){
-            myTokenRepository.delete(receivedToken.get());
+    public Optional<MyToken> validateReceivedToken(String token) {
+        Optional<MyToken> myToken = myTokenRepository.findByToken(token);
+        if(myToken.isEmpty())throw new InvalidDetailsException("Invalid Verification Token");
+        else if(myToken.get().getExpirationTime().isBefore(LocalDateTime.now())){
+            myTokenRepository.delete(myToken.get());
             throw new E_BankException("Token is expired");
         }
-        return receivedToken;
+        return myToken;
     }
 
     @Override
