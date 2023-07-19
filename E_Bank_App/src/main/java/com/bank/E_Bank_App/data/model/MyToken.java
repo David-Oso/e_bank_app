@@ -15,7 +15,7 @@ public class MyToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private Customer customer;
     @Column(unique = true)
     private String token;

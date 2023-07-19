@@ -1,5 +1,6 @@
 package com.bank.E_Bank_App.service.admin;
 
+import com.bank.E_Bank_App.config.adminConfig.AdminConfig;
 import com.bank.E_Bank_App.data.model.Admin;
 import com.bank.E_Bank_App.data.model.AppUser;
 import com.bank.E_Bank_App.data.model.Role;
@@ -7,41 +8,23 @@ import com.bank.E_Bank_App.data.repository.AdminRepository;
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
+    private final AdminConfig adminConfig;
 
-    @Value("${adminId}")
-    private String adminId;
-
-    @Value("${adminFirstName}")
-    private String adminFirstName;
-
-    @Value("${adminLastName}")
-    private String adminLastName;
-
-    @Value("${adminPhoneNumber}")
-    private String adminPhoneNumber;
-
-    @Value("${adminEmail}")
-    private String adminEmail;
-
-    @Value("${adminPassword}")
-    private String adminPassword;
-
-    @PostConstruct
+//    @PostConstruct
     public void registerAdmin(){
     AppUser appUser = AppUser.builder()
-            .firstName(adminFirstName)
-            .lastName(adminLastName)
-            .phoneNumber(adminPhoneNumber)
-            .email(adminEmail)
-            .password(adminPassword)
+            .firstName(adminConfig.getAdminFirstName())
+            .lastName(adminConfig.getAdminLastName())
+            .phoneNumber(adminConfig.getAdminPhoneNumber())
+            .email(adminConfig.getAdminEmail())
+            .password(adminConfig.getAdminPassword())
             .role(Role.ADMIN)
             .isLocked(false)
             .isEnable(true)
@@ -49,7 +32,7 @@ public class AdminServiceImpl implements AdminService {
 
     Admin admin = Admin.builder()
             .appUser(appUser)
-            .identity(adminId)
+            .identity(adminConfig.getAdminId())
             .build();
     adminRepository.save(admin);
     }

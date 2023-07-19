@@ -25,14 +25,22 @@ public class RegisterRequest {
     @Pattern(regexp = NAME_REGEX, message = "last name must " +
             "start with capital letter and it must be only letters")
     private String lastName;
-    @NotEmpty(message = "field email cannot be empty")
-    @NotBlank(message = "field email cannot be blank")
-    @Email(regexp = EMAIL_REGEX_STRING, message = "Invalid email")
-    private String email;
+
     @NotEmpty(message = "field phone number cannot be empty")
     @NotBlank(message = "field phone number cannot be blank")
     @Pattern(regexp = PHONE_NUMBER_REGEX, message = "phone number must start with +234")
     private String phoneNumber;
+
+    @NotEmpty(message = "field email cannot be empty")
+    @NotBlank(message = "field email cannot be blank")
+    @Email(regexp = EMAIL_REGEX_STRING, message = "Invalid email")
+    private String email;
+
+    @NotEmpty(message = "field password cannot be empty")
+    @NotBlank(message = "field password cannot be blank")
+    @Pattern(regexp = PASSWORD_REGEX_STRING, message = "Password must " +
+            "contain at least one capital letter, one small letter, a number and special character(@$!%*?&)")
+    private String password;
 
     @NotBlank(message = "field gender cannot be blank")
     @NotEmpty(message = "field gender cannot be empty")
@@ -42,10 +50,4 @@ public class RegisterRequest {
     @NotEmpty(message = "field date of birth cannot be empty")
     @Pattern(regexp = DATE_OF_BIRTH_REGEX, message = "Date should be in the format dd/MM/yyyy")
     private String dateOfBirth;
-
-    @NotEmpty(message = "field password cannot be empty")
-    @NotBlank(message = "field password cannot be blank")
-    @Pattern(regexp = PASSWORD_REGEX_STRING, message = "Password must " +
-            "contain at least one capital letter, one small letter, a number and special character(@$!%*?&)")
-    private String password;
 }

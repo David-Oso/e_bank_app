@@ -1,44 +1,42 @@
 package com.bank.E_Bank_App.service.mail;
 
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
-import com.bank.E_Bank_App.dto.request.mailRequest.Recipient;
+import com.bank.E_Bank_App.exception.E_BankException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
+import java.io.UnsupportedEncodingException;
 
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class MailServiceImpl implements MailService {
-    @Value("${mail.api.key}")
-    private String mailApiKey;
-
-    @Value("${sendinblue.mail.url}")
-    private String mailUrl;
+    private final JavaMailSender javaMailSender;
+    @Value("${spring.mail.username}")
+    private String senderEmail;
 
     @Override
     @Async
-    public String sendHtmlMail(String name, String email, String subject, String htmlContent) {
-        EmailRequest request = new EmailRequest();
-        Recipient recipient = new Recipient(name, email);
-        request.getTo().add(recipient);
-        request.setSubject(subject);
-        request.setHtmlContent(htmlContent);
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("api-key", mailApiKey);
-        HttpEntity<EmailRequest> requestEntity = new HttpEntity<>(request, headers);
-
-        ResponseEntity<String> response =
-                restTemplate.postForEntity(mailUrl, requestEntity, String.class);
+    public void sendHtmlMail(EmailRequest emailRequest){
+        try{
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message);
+        messageHelper.setFrom(senderEmail, emailRequest.getSenderName());
+        messageHelper.setTo(emailRequest.getRecipientEmail());
+        messageHelper.setSubject(emailRequest.getSubject());
+        messageHelper.setText(emailRequest.getHtmlContent(), true);
+        javaMailSender.send(message);
         log.info(":::::::::::::::::::EMAIL SENT SUCCESSFULLY:::::::::::::::::::");
-        return response.getBody();
+        }catch (MessagingException | UnsupportedEncodingException exception){
+            throw new E_BankException("Error Sending Email");
+        }
     }
 }

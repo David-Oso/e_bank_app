@@ -58,7 +58,7 @@ public class authController {
 
     @GetMapping("send_reset_password_mail/{customer_id}")
     public ResponseEntity<?> sendResetPasswordMail(@Valid @PathVariable Long customer_id){
-        String resetPasswordMailResponse = customerService.sendRequestPasswordMail(customer_id);
+        String resetPasswordMailResponse = customerService.sendResetPasswordMail(customer_id);
         return ResponseEntity.ok(resetPasswordMailResponse);
     }
 }

@@ -3,6 +3,7 @@ package com.bank.E_Bank_App.service.customer;
 import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.*;
+import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.exception.E_BankException;
@@ -13,7 +14,6 @@ import com.bank.E_Bank_App.service.myToken.MyTokenService;
 import com.bank.E_Bank_App.service.cloud.CloudService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -35,21 +35,51 @@ public class CustomerServiceImpl implements CustomerService {
     private final MyTokenService myTokenService;
     private final ModelMapper modelMapper;
     private final CloudService cloudService;
+    private EmailRequest emailRequest;
     //    private final PasswordEncoder passwordEncoder;
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
         checkIfEmailAlreadyExists(registerRequest.getEmail());
-        Customer customer = getSavedCustomer(registerRequest);
-        String token = myTokenService.generateAndSaveMyToken(customer);
+        Customer customer = new Customer();
+        AppUser appUser = modelMapper.map(registerRequest, AppUser.class);
+        appUser.setRole(Role.CUSTOMER);
+//        String encodedPassword = passwordEncoder.encode(request.getPassword());
+//        appUser.setPassword(encodedPassword);
+        appUser.setPassword(registerRequest.getPassword());
+        customer.setAppUser(appUser);
+
+        LocalDate dateOfBirth = convertDateOBirthToLocalDate(registerRequest.getDateOfBirth());
+        customer.setDateOfBirth(dateOfBirth);
         int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
         customer.setAge(age);
         customer.setGender(registerRequest.getGender());
-        customerRepository.save(customer);
-        sendVerificationMail(customer, token);
+        String token = myTokenService.generateAndSaveMyToken(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+        sendVerificationMail(savedCustomer, token);
         return RegisterResponse.builder()
                 .message("Check your mail for verification token to activate your account")
                 .isSuccess(true)
                 .build();
+    }
+
+    @Override
+    public String registerUser(RegisterRequest registerRequest) {
+        checkIfEmailAlreadyExists(registerRequest.getEmail());
+        AppUser appUser = modelMapper.map(registerRequest, AppUser.class);
+        appUser.setRole(Role.CUSTOMER);
+        appUser.setPassword(registerRequest.getPassword());
+
+        Customer customer = new Customer();
+        customer.setAppUser(appUser);
+        LocalDate dateOfBirth = convertDateOBirthToLocalDate(registerRequest.getDateOfBirth());
+        customer.setDateOfBirth(dateOfBirth);
+        int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
+        customer.setAge(age);
+        customer.setGender(registerRequest.getGender());
+        String token = myTokenService.generateAndSaveMyToken(customer);
+        customerRepository.save(customer);
+        sendVerificationMail(customer, token);
+        return "Check your mail for verification token to activate your account";
     }
 
     @Override
@@ -58,6 +88,8 @@ public class CustomerServiceImpl implements CustomerService {
                 validateReceivedToken(emailVerificationRequest.getToken()).get();
         Customer customer = myToken.getCustomer();
         AppUser appUser = customer.getAppUser();
+        if(appUser.isEnable())
+            throw new E_BankException("User is already enabled");
         if(!appUser.isLocked()){
             appUser.setEnable(true);
             customerRepository.save(customer);
@@ -66,7 +98,6 @@ public class CustomerServiceImpl implements CustomerService {
         }
         throw new E_BankException("Error verifying email");
     }
-
 
     private void checkIfEmailAlreadyExists(String email) {
         boolean isPresent = customerRepository.findByAppUser_Email(email).isPresent();
@@ -90,17 +121,21 @@ public class CustomerServiceImpl implements CustomerService {
         sendVerificationMail(customerId);
     }
 
-    private Customer getSavedCustomer(RegisterRequest request) {
-        Customer customer = modelMapper.map(request, Customer.class);
-        AppUser appUser = customer.getAppUser();
-        LocalDate dateOfBirth = convertDateOBirthToLocalDate(request.getDateOfBirth());
-//        String encodedPassword = passwordEncoder.encode(request.getPassword());
-//        appUser.setPassword(encodedPassword);
-        appUser.setRole(Role.CUSTOMER);
-        appUser.setPassword(request.getPassword());
-        customer.setDateOfBirth(dateOfBirth);
-        return customer;
-    }
+//    private Customer getNewAppUser(RegisterRequest request) {
+//        Customer customer = new Customer();
+//        AppUser appUser = modelMapper.map(request, AppUser.class);
+//        appUser.setRole(Role.CUSTOMER);
+////        String encodedPassword = passwordEncoder.encode(request.getPassword());
+////        appUser.setPassword(encodedPassword);
+//        appUser.setPassword(request.getPassword());
+//        LocalDate dateOfBirth = convertDateOBirthToLocalDate(request.getDateOfBirth());
+//        customer.setDateOfBirth(dateOfBirth);
+//        int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
+//        customer.setAge(age);
+//        customer.setGender(request.getGender());
+//        customer.setAppUser(appUser);
+//        return customer;
+//    }
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
@@ -157,7 +192,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String makeDeposit(DepositRequest depositRequest) {
-
         Customer customer = getCustomerById(depositRequest.getCustomerId());
         Account account = customer.getAccount();
         Transaction transaction = setTransaction(depositRequest.getAmount(), TransactionType.DEPOSIT);
@@ -190,7 +224,8 @@ public class CustomerServiceImpl implements CustomerService {
         String subject = "Credit Alert Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        mailService.sendHtmlMail(firstName, email, subject, htmlContent);
+        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        mailService.sendHtmlMail(emailRequest);
     }
 
     @Override
@@ -226,7 +261,8 @@ public class CustomerServiceImpl implements CustomerService {
         String subject = "Debit Alert Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        mailService.sendHtmlMail(firstName, email, subject, htmlContent);
+        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        mailService.sendHtmlMail(emailRequest);
     }
 
     private static void validatePin(String pin, String requestPin) {
@@ -282,7 +318,8 @@ public class CustomerServiceImpl implements CustomerService {
         String subject = "Transfer Transaction Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, recipientAccountNumber, description,
                 transactionType, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        mailService.sendHtmlMail(firstName, email, subject, htmlContent);
+        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        mailService.sendHtmlMail(emailRequest);
     }
 
     private static Transaction setTransaction(BigDecimal amount, TransactionType transactionType){
@@ -339,14 +376,16 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String sendRequestPasswordMail(Long customerId) {
+    public String sendResetPasswordMail(Long customerId) {
         Customer customer = getCustomerById(customerId);
         String mailTemplate = E_BankUtils.GET_RESET_PASSWORD_MAIL_TEMPLATE;
         String firstName = customer.getAppUser().getFirstName();
         String token = myTokenService.generateAndSaveMyToken(customer);
         String htmlContent = String.format(mailTemplate, firstName, token, E_BankUtils.BANK_PHONE_NUMBER);
         String subject = "Reset Password";
-        mailService.sendHtmlMail(firstName, customer.getAppUser().getEmail(), subject, htmlContent);
+        String email = customer.getAppUser().getEmail();
+        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        mailService.sendHtmlMail(emailRequest);
         return "Check your email to reset your password";
     }
 
@@ -423,6 +462,16 @@ public class CustomerServiceImpl implements CustomerService {
         String firstName = customer.getAppUser().getFirstName();
         String htmlContent = String.format(mailTemplate, firstName, token);
         String subject = "Email Verification";
-        mailService.sendHtmlMail(firstName, customer.getAppUser().getEmail(), subject, htmlContent);
+        String email = customer.getAppUser().getEmail();
+        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        mailService.sendHtmlMail(emailRequest);
+
+    }
+    private EmailRequest buildEmailRequest(String email, String subject, String htmlContent){
+        emailRequest = new EmailRequest();
+        emailRequest.setRecipientEmail(email);
+        emailRequest.setSubject(subject);
+        emailRequest.setHtmlContent(htmlContent);
+        return emailRequest;
     }
 }

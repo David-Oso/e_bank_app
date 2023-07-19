@@ -58,10 +58,8 @@ class CustomerServiceImplTest {
         registerRequest2.setDateOfBirth("10/08/2003");
 
         emailVerificationRequest1 = new EmailVerificationRequest();
-        emailVerificationRequest1.setEmail("osodavid001@gmail.com");
         emailVerificationRequest1.setToken("73-qxlVi");
         emailVerificationRequest2 = new EmailVerificationRequest();
-        emailVerificationRequest2.setEmail("osodavid272@gmail.com");
         emailVerificationRequest2.setToken("4vL2Y8dg");
 
         authenticationRequest = new AuthenticationRequest();
@@ -230,7 +228,7 @@ class CustomerServiceImplTest {
 
     @Test
     void sendResetPasswordMailTest(){
-        String response = customerService.sendRequestPasswordMail(2L);
+        String response = customerService.sendResetPasswordMail(2L);
         assertThat(response).isEqualTo("Check your email to reset your password");
     }
 

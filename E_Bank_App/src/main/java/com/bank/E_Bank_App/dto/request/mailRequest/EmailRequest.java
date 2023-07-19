@@ -16,8 +16,8 @@ import static com.bank.E_Bank_App.utils.E_BankUtils.BANK_NAME;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmailRequest {
-    private final Sender sender = new Sender(BANK_NAME, BANK_EMAIL);
-    private List<Recipient> to = new ArrayList<>();
+    private final String senderName = BANK_NAME;
+    private String recipientEmail;
     private String subject;
     private String htmlContent;
 }

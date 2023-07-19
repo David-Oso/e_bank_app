@@ -1,5 +1,6 @@
 package com.bank.E_Bank_App.config.appConfig;
 
+import com.bank.E_Bank_App.config.adminConfig.AdminConfig;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
 import com.bank.E_Bank_App.exception.NotFoundException;
@@ -29,6 +30,29 @@ public class AppConfig {
     private String apiKey;
     @Value("${cloudinary.api.secret}")
     private String apiSecret;
+
+    @Value("${adminId}")
+    private String adminId;
+
+    @Value("${adminFirstName}")
+    private String adminFirstName;
+
+    @Value("${adminLastName}")
+    private String adminLastName;
+
+    @Value("${adminPhoneNumber}")
+    private String adminPhoneNumber;
+
+    @Value("${adminEmail}")
+    private String adminEmail;
+
+    @Value("${adminPassword}")
+    private String adminPassword;
+
+    @Bean
+    public AdminConfig adminConfig(){
+        return new AdminConfig(adminId, adminFirstName, adminLastName, adminPhoneNumber, adminEmail, adminPassword);
+    }
 
     @Bean
     public ModelMapper modelMapper(){

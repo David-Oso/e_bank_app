@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface CustomerService {
     RegisterResponse register(RegisterRequest registerRequest);
+    String registerUser(RegisterRequest registerRequest);
     String verifyEmail(EmailVerificationRequest emailVerificationRequest);
     void sendVerificationMail(Long customerId);
     void resendVerificationMail(Long customerId);
@@ -24,7 +25,7 @@ public interface CustomerService {
     String makeTransfer(TransferRequest transferRequest);
     BigDecimal getBalance(Long customerId, String pin);
     String updateCustomer(UpdateCustomerRequest updateCustomerRequest);
-    String sendRequestPasswordMail(Long customerId);
+    String sendResetPasswordMail(Long customerId);
     String resetPassword(ResetPasswordRequest resetPasswordRequest);
     String uploadImage(UploadImageRequest uploadImageRequest);
     Transaction getTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId);
