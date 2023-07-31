@@ -3,6 +3,7 @@ package com.bank.E_Bank_App.service.implementations;
 import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,21 +126,18 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void sendVerificationMailTest(){
-        customerService.sendVerificationMail(2L);
+    void resendVerificationMailTest(){
+        String response = customerService.resendVerificationMail(2L);
+        assertThat(response).isEqualTo("Another otp has sent to your mail proceed by checking your email");
     }
 
-    @Test
-    void resendVerificationMailTest(){
-        customerService.resendVerificationMail(2L);
-    }
     @Test
     void verifyEmailTest(){
-        String response1 = customerService.verifyEmail(emailVerificationRequest1);
-        assertThat(response1).isEqualTo("Verification successful");
+        OtpVerificationResponse response1 = customerService.verifyEmail("436502");
+        assertThat(response1.getEmail()).isEqualTo(registerRequest1.getEmail());
 
-        String response2 = customerService.verifyEmail(emailVerificationRequest2);
-        assertThat(response2).isEqualTo("Verification successful");
+        OtpVerificationResponse response2 = customerService.verifyEmail("590792");
+        assertThat(response2.getEmail()).isEqualTo(registerRequest2.getEmail());
     }
 
     @Test

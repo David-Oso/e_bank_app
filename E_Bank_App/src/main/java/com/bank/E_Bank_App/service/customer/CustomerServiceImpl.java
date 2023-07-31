@@ -5,6 +5,7 @@ import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
 import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
@@ -45,13 +46,7 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = new Customer();
         AppUser appUser = getNewAppUser(registerRequest);
 
-        customer.setAppUser(appUser);
-        LocalDate dateOfBirth = convertDateOBirthToLocalDate(registerRequest.getDateOfBirth());
-        customer.setDateOfBirth(dateOfBirth);
-        int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
-        customer.setAge(age);
-        customer.setGender(registerRequest.getGender());
-        Customer savedCustomer = customerRepository.save(customer);
+        Customer savedCustomer = getNewCustomer(registerRequest, customer, appUser);
         String otp = otpService.generateAndSaveOtp(savedCustomer);
         log.info("\n\n:::::::::::::::::::: GENERATED OTP -> %s ::::::::::::::::::::\n".formatted(otp));
         sendVerificationMail(savedCustomer, otp);
@@ -81,6 +76,16 @@ public class CustomerServiceImpl implements CustomerService {
         return appUser;
     }
 
+    private Customer getNewCustomer(RegisterRequest registerRequest, Customer customer, AppUser appUser) {
+        customer.setAppUser(appUser);
+        LocalDate dateOfBirth = convertDateOBirthToLocalDate(registerRequest.getDateOfBirth());
+        customer.setDateOfBirth(dateOfBirth);
+        int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
+        customer.setAge(age);
+        customer.setGender(registerRequest.getGender());
+        return customerRepository.save(customer);
+    }
+
     private LocalDate convertDateOBirthToLocalDate(String date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return LocalDate.parse(date, formatter);
@@ -92,10 +97,10 @@ public class CustomerServiceImpl implements CustomerService {
         else return years;
     }
 
-    private void sendVerificationMail(Customer customer, String token){
+    private void sendVerificationMail(Customer customer, String otp){
         String mailTemplate = E_BankUtils.GET_EMAIL_VERIFICATION_MAIL_TEMPLATE;
         String firstName = customer.getAppUser().getFirstName();
-        String htmlContent = String.format(mailTemplate, firstName, token);
+        String htmlContent = String.format(mailTemplate, firstName, otp);
         String subject = "Email Verification";
         String email = customer.getAppUser().getEmail();
         emailRequest = buildEmailRequest(email, subject, htmlContent);
@@ -103,32 +108,47 @@ public class CustomerServiceImpl implements CustomerService {
 
     }
     @Override
-    public String verifyEmail(String otp) {
-        OtpEntity otpEntity = otpService.
-                validateReceivedOtp(otp);
+    public OtpVerificationResponse verifyEmail(String otp) {
+        OtpEntity otpEntity = otpService.validateReceivedOtp(otp);
         Customer customer = otpEntity.getCustomer();
         AppUser appUser = customer.getAppUser();
         if(appUser.isEnable())
             throw new E_BankException("User is already enabled");
         if(!appUser.isLocked()){
             appUser.setEnable(true);
-            customerRepository.save(customer);
+            Customer savedCustomer = customerRepository.save(customer);
             otpService.deleteToken(otpEntity);
-            return "Verification successful";
+            return getOtpVerificationResponse(savedCustomer);
         }
         throw new E_BankException("Error verifying email");
     }
 
-    @Override
-    public void sendVerificationMail(Long customerId) {
-        Customer customer = getCustomerById(customerId);
-        String token = otpService.generateAndSaveOtp(customer);
-        sendVerificationMail(customer, token);
+    private OtpVerificationResponse getOtpVerificationResponse(Customer customer) {
+        return OtpVerificationResponse.builder()
+                .id(customer.getId())
+                .firstName(customer.getAppUser().getFirstName())
+                .lastName(customer.getAppUser().getLastName())
+                .age(customer.getAge())
+                .gender(customer.getGender())
+                .email(customer.getAppUser().getEmail())
+                .phoneNumber(customer.getAppUser().getPhoneNumber())
+//                .jwtResponse()
+                .build();
     }
 
+//    @Override
+//    public void sendVerificationMail(Long customerId) {
+//        Customer customer = getCustomerById(customerId);
+//        String token = otpService.generateAndSaveOtp(customer);
+//        sendVerificationMail(customer, token);
+//    }
+
     @Override
-    public void resendVerificationMail(Long customerId) {
-        sendVerificationMail(customerId);
+    public String resendVerificationMail(Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        String otp = otpService.generateAndSaveOtp(customer);
+        sendVerificationMail(customer, otp);
+        return "Another otp has sent to your mail proceed by checking your email";
     }
 
 //    private Customer getNewAppUser(RegisterRequest request) {
@@ -156,6 +176,7 @@ public class CustomerServiceImpl implements CustomerService {
         else return AuthenticationResponse.builder()
                 .message("Authentication successful")
                 .isAuthenticated(true)
+//                .jwtResponse()
                 .build();
     }
 
