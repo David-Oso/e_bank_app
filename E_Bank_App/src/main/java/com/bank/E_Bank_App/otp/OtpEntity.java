@@ -1,5 +1,6 @@
-package com.bank.E_Bank_App.data.model;
+package com.bank.E_Bank_App.otp;
 
+import com.bank.E_Bank_App.data.model.Customer;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class MyToken {
+public class OtpEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

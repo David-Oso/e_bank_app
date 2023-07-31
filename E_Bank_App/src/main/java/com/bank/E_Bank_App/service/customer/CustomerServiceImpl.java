@@ -9,11 +9,13 @@ import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
 import com.bank.E_Bank_App.exception.NotFoundException;
+import com.bank.E_Bank_App.otp.OtpEntity;
 import com.bank.E_Bank_App.service.mail.MailService;
-import com.bank.E_Bank_App.service.myToken.MyTokenService;
+import com.bank.E_Bank_App.otp.OtpService;
 import com.bank.E_Bank_App.service.cloud.CloudService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -24,15 +26,15 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final MailService mailService;
-    private final MyTokenService myTokenService;
+    private final OtpService otpService;
     private final ModelMapper modelMapper;
     private final CloudService cloudService;
     private EmailRequest emailRequest;
@@ -41,62 +43,22 @@ public class CustomerServiceImpl implements CustomerService {
     public RegisterResponse register(RegisterRequest registerRequest) {
         checkIfEmailAlreadyExists(registerRequest.getEmail());
         Customer customer = new Customer();
-        AppUser appUser = modelMapper.map(registerRequest, AppUser.class);
-        appUser.setRole(Role.CUSTOMER);
-//        String encodedPassword = passwordEncoder.encode(request.getPassword());
-//        appUser.setPassword(encodedPassword);
-        appUser.setPassword(registerRequest.getPassword());
-        customer.setAppUser(appUser);
+        AppUser appUser = getNewAppUser(registerRequest);
 
+        customer.setAppUser(appUser);
         LocalDate dateOfBirth = convertDateOBirthToLocalDate(registerRequest.getDateOfBirth());
         customer.setDateOfBirth(dateOfBirth);
         int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
         customer.setAge(age);
         customer.setGender(registerRequest.getGender());
-        String token = myTokenService.generateAndSaveMyToken(customer);
         Customer savedCustomer = customerRepository.save(customer);
-        sendVerificationMail(savedCustomer, token);
+        String otp = otpService.generateAndSaveOtp(savedCustomer);
+        log.info("\n\n:::::::::::::::::::: GENERATED OTP -> %s ::::::::::::::::::::\n".formatted(otp));
+        sendVerificationMail(savedCustomer, otp);
         return RegisterResponse.builder()
                 .message("Check your mail for verification token to activate your account")
                 .isSuccess(true)
                 .build();
-    }
-
-    @Override
-    public String registerUser(RegisterRequest registerRequest) {
-        checkIfEmailAlreadyExists(registerRequest.getEmail());
-        AppUser appUser = modelMapper.map(registerRequest, AppUser.class);
-        appUser.setRole(Role.CUSTOMER);
-        appUser.setPassword(registerRequest.getPassword());
-
-        Customer customer = new Customer();
-        customer.setAppUser(appUser);
-        LocalDate dateOfBirth = convertDateOBirthToLocalDate(registerRequest.getDateOfBirth());
-        customer.setDateOfBirth(dateOfBirth);
-        int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
-        customer.setAge(age);
-        customer.setGender(registerRequest.getGender());
-        String token = myTokenService.generateAndSaveMyToken(customer);
-        customerRepository.save(customer);
-        sendVerificationMail(customer, token);
-        return "Check your mail for verification token to activate your account";
-    }
-
-    @Override
-    public String verifyEmail(EmailVerificationRequest emailVerificationRequest) {
-        MyToken myToken = myTokenService.
-                validateReceivedToken(emailVerificationRequest.getToken()).get();
-        Customer customer = myToken.getCustomer();
-        AppUser appUser = customer.getAppUser();
-        if(appUser.isEnable())
-            throw new E_BankException("User is already enabled");
-        if(!appUser.isLocked()){
-            appUser.setEnable(true);
-            customerRepository.save(customer);
-            myTokenService.deleteToken(myToken);
-            return "Verification successful";
-        }
-        throw new E_BankException("Error verifying email");
     }
 
     private void checkIfEmailAlreadyExists(String email) {
@@ -109,10 +71,58 @@ public class CustomerServiceImpl implements CustomerService {
                 throw new E_BankException("Account has been locked for some time");
         }
     }
+
+    private AppUser getNewAppUser(RegisterRequest registerRequest) {
+        AppUser appUser = modelMapper.map(registerRequest, AppUser.class);
+        appUser.setRole(Role.CUSTOMER);
+//        String encodedPassword = passwordEncoder.encode(request.getPassword());
+//        appUser.setPassword(encodedPassword);
+        appUser.setPassword(registerRequest.getPassword());
+        return appUser;
+    }
+
+    private LocalDate convertDateOBirthToLocalDate(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return LocalDate.parse(date, formatter);
+    }
+    private int changeDateToIntAndValidateAge(LocalDate date) {
+        int years = Period.between(date, LocalDate.now()).getYears();
+        if(years < 16)
+            throw new E_BankException("Cannot register this account because you are less than 16 years old");
+        else return years;
+    }
+
+    private void sendVerificationMail(Customer customer, String token){
+        String mailTemplate = E_BankUtils.GET_EMAIL_VERIFICATION_MAIL_TEMPLATE;
+        String firstName = customer.getAppUser().getFirstName();
+        String htmlContent = String.format(mailTemplate, firstName, token);
+        String subject = "Email Verification";
+        String email = customer.getAppUser().getEmail();
+        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        mailService.sendHtmlMail(emailRequest);
+
+    }
+    @Override
+    public String verifyEmail(String otp) {
+        OtpEntity otpEntity = otpService.
+                validateReceivedOtp(otp);
+        Customer customer = otpEntity.getCustomer();
+        AppUser appUser = customer.getAppUser();
+        if(appUser.isEnable())
+            throw new E_BankException("User is already enabled");
+        if(!appUser.isLocked()){
+            appUser.setEnable(true);
+            customerRepository.save(customer);
+            otpService.deleteToken(otpEntity);
+            return "Verification successful";
+        }
+        throw new E_BankException("Error verifying email");
+    }
+
     @Override
     public void sendVerificationMail(Long customerId) {
         Customer customer = getCustomerById(customerId);
-        String token = myTokenService.generateAndSaveMyToken(customer);
+        String token = otpService.generateAndSaveOtp(customer);
         sendVerificationMail(customer, token);
     }
 
@@ -380,7 +390,7 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = getCustomerById(customerId);
         String mailTemplate = E_BankUtils.GET_RESET_PASSWORD_MAIL_TEMPLATE;
         String firstName = customer.getAppUser().getFirstName();
-        String token = myTokenService.generateAndSaveMyToken(customer);
+        String token = otpService.generateAndSaveOtp(customer);
         String htmlContent = String.format(mailTemplate, firstName, token, E_BankUtils.BANK_PHONE_NUMBER);
         String subject = "Reset Password";
         String email = customer.getAppUser().getEmail();
@@ -393,12 +403,12 @@ public class CustomerServiceImpl implements CustomerService {
     public String resetPassword(ResetPasswordRequest resetPasswordRequest) {
         Customer customer = getCustomerByEmail(resetPasswordRequest.getEmail());
         AppUser appUser = customer.getAppUser();
-        Optional<MyToken> receivedToken = myTokenService.validateReceivedToken(resetPasswordRequest.getToken());
+        OtpEntity receivedToken = otpService.validateReceivedOtp(resetPasswordRequest.getToken());
         appUser.setPassword(resetPasswordRequest.getNewPassword());
         if(!appUser.getPassword().equals(resetPasswordRequest.getConfirmPassword()))
             throw new InvalidDetailsException("Password doesn't match");
         customerRepository.save(customer);
-        myTokenService.deleteToken(receivedToken.get());
+        otpService.deleteToken(receivedToken);
         return "Password reset successful";
     }
 
@@ -446,27 +456,6 @@ public class CustomerServiceImpl implements CustomerService {
         return "Transactions deleted successfully";
     }
 
-    private LocalDate convertDateOBirthToLocalDate(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return LocalDate.parse(date, formatter);
-    }
-    private int changeDateToIntAndValidateAge(LocalDate date) {
-        int years = Period.between(date, LocalDate.now()).getYears();
-        if(years < 16)
-            throw new E_BankException("Cannot register this account because you are less than 16 years old");
-        else return years;
-    }
-
-    private void sendVerificationMail(Customer customer, String token){
-        String mailTemplate = E_BankUtils.GET_EMAIL_VERIFICATION_MAIL_TEMPLATE;
-        String firstName = customer.getAppUser().getFirstName();
-        String htmlContent = String.format(mailTemplate, firstName, token);
-        String subject = "Email Verification";
-        String email = customer.getAppUser().getEmail();
-        emailRequest = buildEmailRequest(email, subject, htmlContent);
-        mailService.sendHtmlMail(emailRequest);
-
-    }
     private EmailRequest buildEmailRequest(String email, String subject, String htmlContent){
         emailRequest = new EmailRequest();
         emailRequest.setRecipientEmail(email);

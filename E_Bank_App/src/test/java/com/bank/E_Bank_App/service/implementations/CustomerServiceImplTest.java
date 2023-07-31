@@ -24,8 +24,6 @@ class CustomerServiceImplTest {
     @Autowired CustomerService customerService;
     private RegisterRequest registerRequest1;
     private RegisterRequest registerRequest2;
-    private EmailVerificationRequest emailVerificationRequest1;
-    private EmailVerificationRequest emailVerificationRequest2;
     private AuthenticationRequest authenticationRequest;
     private SetUpAccountRequest setUpAccountRequest1;
     private SetUpAccountRequest setUpAccountRequest2;
@@ -56,11 +54,6 @@ class CustomerServiceImplTest {
         registerRequest2.setPhoneNumber("+2345098767867");
         registerRequest2.setGender(Gender.FEMALE);
         registerRequest2.setDateOfBirth("10/08/2003");
-
-        emailVerificationRequest1 = new EmailVerificationRequest();
-        emailVerificationRequest1.setToken("73-qxlVi");
-        emailVerificationRequest2 = new EmailVerificationRequest();
-        emailVerificationRequest2.setToken("4vL2Y8dg");
 
         authenticationRequest = new AuthenticationRequest();
         authenticationRequest.setEmail("osodavid001@gmail.com");
