@@ -44,27 +44,13 @@ public class E_BankUtils {
     public static String GET_TRANSFER_NOTIFICATION_MAIL_TEMPLATE = getTemplate(TRANSFER_NOTIFICATION_MAIL_TEMPLATE_LOCATION);
     public static String GET_RESET_PASSWORD_MAIL_TEMPLATE = getTemplate(RESET_PASSWORD_TEMPLATE_LOCATION);
 
-//    public static String generateVerificationLink(String email) {
-//        return USER_VERIFICATION_BASE_URL + "?id/0*&token=" + generateVerificationToken(email);
-//    }
 
-//    private static Key getSignInKey() {
-//        return Keys.hmacShaKeyFor("Yn2kjibddFAWtnPJ2AFlL8WXmohJMC1RT4657YHGTHDUIjuehdy8764JJUYIU76YGHHH3KN4vigQggaEypa5E=".getBytes());
-//    }
-
-//    private static String generateVerificationToken(String email) {
-//        return Jwts.builder()
-//                .setIssuer(BANK_NAME)
-//                .setSubject(email)
-//                .signWith(getSignInKey())
-//                .setIssuedAt(new Date())
-//                .setExpiration(Date.from(Instant.now().plusSeconds(1800L)))
-//                .compact();
-//    }
-
+    private static final SecureRandom secureRandom = new SecureRandom();
+    public static String generateOtp(){
+        return String.valueOf(secureRandom.nextInt(101000, 1000000));
+    }
 
     public static String generateRandomString(int length) {
-        SecureRandom secureRandom = new SecureRandom();
         byte[] randomBytes = new byte[length];
         secureRandom.nextBytes(randomBytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
