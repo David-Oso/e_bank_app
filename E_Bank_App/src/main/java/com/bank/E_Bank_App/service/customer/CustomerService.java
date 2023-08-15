@@ -3,7 +3,7 @@ package com.bank.E_Bank_App.service.customer;
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Transaction;
 import com.bank.E_Bank_App.dto.request.*;
-import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 
@@ -15,7 +15,7 @@ public interface CustomerService {
     OtpVerificationResponse verifyEmail(String otp);
 //    void sendVerificationMail(Long customerId);
     String resendVerificationMail(Long customerId);
-    AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest);
+    LoginResponse authenticate(LoginRequest loginRequest);
     Customer getCustomerById(Long customerId);
     Customer getCustomerByEmail(String email);
     Customer getCustomerByAccountNumber(String accountNumber);

@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @Setter
 public class WithDrawRequest {
 
-    @NotNull(message = "field user id cannot be null")
+    @NotNull(message = "field customer id cannot be null")
     private Long customerId;
 
     @NotNull(message = "field amount cannot be null")

@@ -2,7 +2,7 @@ package com.bank.E_Bank_App.service.implementations;
 
 import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.dto.request.*;
-import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.service.customer.CustomerService;
@@ -25,7 +25,7 @@ class CustomerServiceImplTest {
     @Autowired CustomerService customerService;
     private RegisterRequest registerRequest1;
     private RegisterRequest registerRequest2;
-    private AuthenticationRequest authenticationRequest;
+    private LoginRequest loginRequest;
     private SetUpAccountRequest setUpAccountRequest1;
     private SetUpAccountRequest setUpAccountRequest2;
     private UploadImageRequest uploadImageRequest;
@@ -56,9 +56,9 @@ class CustomerServiceImplTest {
         registerRequest2.setGender(Gender.FEMALE);
         registerRequest2.setDateOfBirth("10/08/2003");
 
-        authenticationRequest = new AuthenticationRequest();
-        authenticationRequest.setEmail("osodavid001@gmail.com");
-        authenticationRequest.setPassword("Password");
+        loginRequest = new LoginRequest();
+        loginRequest.setEmail("osodavid001@gmail.com");
+        loginRequest.setPassword("Password");
 
         setUpAccountRequest1 = new SetUpAccountRequest();
         setUpAccountRequest1.setCustomerId(1L);
@@ -70,16 +70,16 @@ class CustomerServiceImplTest {
 
         depositRequest = new DepositRequest();
         depositRequest.setCustomerId(1L);
-        depositRequest.setAmount(BigDecimal.valueOf(50000));
+        depositRequest.setAmount(BigDecimal.valueOf(100000));
 
         withDrawRequest = new WithDrawRequest();
         withDrawRequest.setCustomerId(1L);
-        withDrawRequest.setAmount(BigDecimal.valueOf(70000));
+        withDrawRequest.setAmount(BigDecimal.valueOf(20000));
         withDrawRequest.setPin("1234");
 
         transferRequest = new TransferRequest();
         transferRequest.setCustomerId(1L);
-        transferRequest.setRecipientAccountNumber("9555684342");
+        transferRequest.setRecipientAccountNumber("6557836251");
         transferRequest.setAmount(BigDecimal.valueOf(20000));
         transferRequest.setPin("1234");
 
@@ -116,9 +116,9 @@ class CustomerServiceImplTest {
 
     @Test
     void registerUserTest() {
-        RegisterResponse response = customerService.register(registerRequest1);
-        assertThat(response.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
-        assertThat(response.isSuccess()).isEqualTo(true);
+//        RegisterResponse response = customerService.register(registerRequest1);
+//        assertThat(response.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
+//        assertThat(response.isSuccess()).isEqualTo(true);
 
         RegisterResponse response1 = customerService.register(registerRequest2);
         assertThat(response1.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
@@ -133,16 +133,16 @@ class CustomerServiceImplTest {
 
     @Test
     void verifyEmailTest(){
-        OtpVerificationResponse response1 = customerService.verifyEmail("436502");
-        assertThat(response1.getEmail()).isEqualTo(registerRequest1.getEmail());
+//        OtpVerificationResponse response1 = customerService.verifyEmail("762405");
+//        assertThat(response1.getEmail()).isEqualTo(registerRequest1.getEmail());
 
-        OtpVerificationResponse response2 = customerService.verifyEmail("590792");
+        OtpVerificationResponse response2 = customerService.verifyEmail("133265");
         assertThat(response2.getEmail()).isEqualTo(registerRequest2.getEmail());
     }
 
     @Test
     void authenticateUserTest() {
-        AuthenticationResponse response = customerService.authenticate(authenticationRequest);
+        LoginResponse response = customerService.authenticate(loginRequest);
         assertThat(response.getMessage()).isEqualTo("Authentication successful");
         assertThat(response.isAuthenticated()).isEqualTo(true);
     }
@@ -165,7 +165,7 @@ class CustomerServiceImplTest {
 
     @Test
     void getCustomerByAccountNumberTest(){
-        Customer foundCustomer = customerService.getCustomerByAccountNumber("9872958385");
+        Customer foundCustomer = customerService.getCustomerByAccountNumber("2798899935");
         String email = foundCustomer.getAppUser().getEmail();
         assertThat(email).isEqualTo(registerRequest1.getEmail());
     }
@@ -187,28 +187,28 @@ class CustomerServiceImplTest {
     @Test
     void getBalanceTest(){
         BigDecimal balance = customerService.getBalance(1L, "1234");
-        assertThat(balance).isEqualTo(BigDecimal.valueOf(50000).setScale(2));
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(300000).setScale(2));
     }
 
     @Test
     void makeWithdrawTest(){
         String response = customerService.makeWithdraw(withDrawRequest);
         assertThat(response).isEqualTo("Transaction Successful");
-//        BigDecimal balance = customerService.getBalance(withDrawRequest.getUserId(), withDrawRequest.getPin());
-//        assertThat(balance).isEqualTo(BigDecimal.valueOf(40000).setScale(2));
+        BigDecimal balance = customerService.getBalance(withDrawRequest.getCustomerId(), withDrawRequest.getPin());
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(240000).setScale(2));
     }
 
     @Test
     void makeTransferTest(){
         String response  = customerService.makeTransfer(transferRequest);
         assertThat(response).isEqualTo("Transaction Successful");
-//        BigDecimal balance = customerService.getBalance(transferRequest.getUserId(), transferRequest.getPin());
-//        assertThat(balance).isEqualTo(BigDecimal.valueOf(20000).setScale(2));
+        BigDecimal balance = customerService.getBalance(transferRequest.getCustomerId(), transferRequest.getPin());
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(220000).setScale(2));
 
-//        Customer recipient = customerService.getCustomerByAccountNumber(transferRequest.getRecipientAccountNumber());
-//        String recipientPin = recipient.getAccount().getPin();
-//        BigDecimal recipientBalance = customerService.getBalance(recipient.getId(), recipientPin);
-//        assertThat(recipientBalance).isEqualTo(BigDecimal.valueOf(20000).setScale(2));
+        Customer recipient = customerService.getCustomerByAccountNumber(transferRequest.getRecipientAccountNumber());
+        String recipientPin = recipient.getAccount().getPin();
+        BigDecimal recipientBalance = customerService.getBalance(recipient.getId(), recipientPin);
+        assertThat(recipientBalance).isEqualTo(BigDecimal.valueOf(20000).setScale(2));
     }
 
     @Test

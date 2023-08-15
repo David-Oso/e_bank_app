@@ -6,8 +6,7 @@ import com.bank.E_Bank_App.data.model.AppUser;
 import com.bank.E_Bank_App.data.model.Role;
 import com.bank.E_Bank_App.data.repository.AdminRepository;
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
-import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
-import jakarta.annotation.PostConstruct;
+import com.bank.E_Bank_App.dto.response.LoginResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +38,7 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
-    public AuthenticationResponse authenticate(AdminLoginRequest request) {
+    public LoginResponse authenticate(AdminLoginRequest request) {
         return null;
     }
 }

@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class AuthenticationRequest {
+public class LoginRequest {
     @NotBlank(message = "field email cannot be blank")
     @NotEmpty(message = "field email cannot be empty")
     @NotNull(message = "field email cannot be null")

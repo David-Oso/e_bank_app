@@ -1,9 +1,9 @@
 package com.bank.E_Bank_App.controller;
 
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
-import com.bank.E_Bank_App.dto.request.AuthenticationRequest;
+import com.bank.E_Bank_App.dto.request.LoginRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
-import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.service.admin.AdminService;
@@ -33,14 +33,14 @@ public class authController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(verificationResponse);
     }
     @PostMapping("customer/login")
-    public ResponseEntity<?>  customerLogin(@Valid @RequestBody AuthenticationRequest authenticationRequest){
-        AuthenticationResponse customerLoginResponse = customerService.authenticate(authenticationRequest);
+    public ResponseEntity<?>  customerLogin(@Valid @RequestBody LoginRequest loginRequest){
+        LoginResponse customerLoginResponse = customerService.authenticate(loginRequest);
         return ResponseEntity.status(HttpStatus.OK).body(customerLoginResponse);
     }
 
     @PostMapping("admin/login")
     public ResponseEntity<?> adminLogin(@Valid @RequestBody AdminLoginRequest adminLoginRequest){
-        AuthenticationResponse adminLoginResponse = adminService.authenticate(adminLoginRequest);
+        LoginResponse adminLoginResponse = adminService.authenticate(adminLoginRequest);
         return ResponseEntity.status(HttpStatus.OK).body(adminLoginResponse);
     }
 

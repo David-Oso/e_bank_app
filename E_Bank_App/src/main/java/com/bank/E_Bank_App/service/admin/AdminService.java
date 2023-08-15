@@ -1,8 +1,8 @@
 package com.bank.E_Bank_App.service.admin;
 
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
-import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.dto.response.LoginResponse;
 
 public interface AdminService {
-    AuthenticationResponse authenticate(AdminLoginRequest request);
+    LoginResponse authenticate(AdminLoginRequest request);
 }

@@ -4,7 +4,7 @@ import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
-import com.bank.E_Bank_App.dto.response.AuthenticationResponse;
+import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import com.bank.E_Bank_App.exception.E_BankException;
@@ -15,6 +15,7 @@ import com.bank.E_Bank_App.service.mail.MailService;
 import com.bank.E_Bank_App.otp.OtpService;
 import com.bank.E_Bank_App.service.cloud.CloudService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -151,29 +153,14 @@ public class CustomerServiceImpl implements CustomerService {
         return "Another otp has sent to your mail proceed by checking your email";
     }
 
-//    private Customer getNewAppUser(RegisterRequest request) {
-//        Customer customer = new Customer();
-//        AppUser appUser = modelMapper.map(request, AppUser.class);
-//        appUser.setRole(Role.CUSTOMER);
-////        String encodedPassword = passwordEncoder.encode(request.getPassword());
-////        appUser.setPassword(encodedPassword);
-//        appUser.setPassword(request.getPassword());
-//        LocalDate dateOfBirth = convertDateOBirthToLocalDate(request.getDateOfBirth());
-//        customer.setDateOfBirth(dateOfBirth);
-//        int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
-//        customer.setAge(age);
-//        customer.setGender(request.getGender());
-//        customer.setAppUser(appUser);
-//        return customer;
-//    }
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
-        Customer customer = getCustomerByEmail(authenticationRequest.getEmail());
+    public LoginResponse authenticate(LoginRequest loginRequest) {
+        Customer customer = getCustomerByEmail(loginRequest.getEmail());
         AppUser appUser = customer.getAppUser();
-        if(!appUser.getPassword().equals(authenticationRequest.getPassword()))
+        if(!appUser.getPassword().equals(loginRequest.getPassword()))
             throw new InvalidDetailsException("Incorrect Password");
-        else return AuthenticationResponse.builder()
+        else return LoginResponse.builder()
                 .message("Authentication successful")
                 .isAuthenticated(true)
 //                .jwtResponse()
@@ -227,26 +214,23 @@ public class CustomerServiceImpl implements CustomerService {
         Account account = customer.getAccount();
         Transaction transaction = setTransaction(depositRequest.getAmount(), TransactionType.DEPOSIT);
         account.getTransactions().add(transaction);
+        sendDepositNotification(customer, depositRequest.getAmount());
         customerRepository.save(customer);
-        sendDepositNotification(customer, depositRequest.getAmount(),false, null);
         return "Transaction Successful";
     }
 
-    private void sendDepositNotification(Customer customer, BigDecimal amount, boolean isTransfer, Customer fromCustomer) {
+    private void sendDepositNotification(Customer customer, BigDecimal amount) {
         String mailTemplate = E_BankUtils.GET_DEPOSIT_NOTIFICATION_MAIL_TEMPLATE;
         String email = customer.getAppUser().getEmail();
         String firstName = customer.getAppUser().getFirstName();
-        String fromCustomerFirstName = fromCustomer.getAppUser().getFirstName();
-        String fromCustomerLastName = fromCustomer.getAppUser().getLastName();
+//        String fromCustomerFirstName = fromCustomer.getAppUser().getFirstName();
+//        String fromCustomerLastName = fromCustomer.getAppUser().getLastName();
         String lastName= customer.getAppUser().getLastName();
         String accountName = "%s %s".formatted(firstName, lastName);
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
         String accountNumber = number.replace(2, 8, "********").toString();
         String transactionType = "Deposit";
-        String description = "";
-        if(isTransfer)
-            description = "Transfer from %s %s".formatted(fromCustomerFirstName, fromCustomerLastName);
-        else description = "Deposit into your account";
+        String description = "Deposit into your account";
         String transactionAmount = "₦%s".formatted(amount);
         String transactionDateAndTime = DateTimeFormatter.ofPattern("EEE, dd/MM/yy, hh:mm:ss a").format(LocalDateTime.now());
         String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
@@ -269,8 +253,8 @@ public class CustomerServiceImpl implements CustomerService {
         checkWhetherBalanceIsSufficient(balance, withDrawRequest.getAmount());
         Transaction transaction = setTransaction(withDrawRequest.getAmount(), TransactionType.WITHDRAW);
         account.getTransactions().add(transaction);
-        customerRepository.save(customer);
         sendWithdrawNotificationMail(customer, withDrawRequest.getAmount());
+        customerRepository.save(customer);
         return "Transaction Successful";
     }
 
@@ -324,9 +308,9 @@ public class CustomerServiceImpl implements CustomerService {
 
         transaction.setTransactionType(TransactionType.DEPOSIT);
         recipientAccount.getTransactions().add(transaction);
-        customerRepository.save(recipient);
         sendTransferNotificationMail(customer, transferRequest.getAmount(), recipientAccount.getAccountNumber());
-        sendDepositNotification(recipient, transferRequest.getAmount(), true, recipient);
+        sendDepositNotification(recipient, transferRequest.getAmount());
+        customerRepository.save(recipient);
         return "Transaction Successful";
     }
 
@@ -411,8 +395,8 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = getCustomerById(customerId);
         String mailTemplate = E_BankUtils.GET_RESET_PASSWORD_MAIL_TEMPLATE;
         String firstName = customer.getAppUser().getFirstName();
-        String token = otpService.generateAndSaveOtp(customer);
-        String htmlContent = String.format(mailTemplate, firstName, token, E_BankUtils.BANK_PHONE_NUMBER);
+        String otp = otpService.generateAndSaveOtp(customer);
+        String htmlContent = String.format(mailTemplate, firstName, otp, E_BankUtils.BANK_PHONE_NUMBER);
         String subject = "Reset Password";
         String email = customer.getAppUser().getEmail();
         emailRequest = buildEmailRequest(email, subject, htmlContent);
@@ -424,12 +408,12 @@ public class CustomerServiceImpl implements CustomerService {
     public String resetPassword(ResetPasswordRequest resetPasswordRequest) {
         Customer customer = getCustomerByEmail(resetPasswordRequest.getEmail());
         AppUser appUser = customer.getAppUser();
-        OtpEntity receivedToken = otpService.validateReceivedOtp(resetPasswordRequest.getToken());
+        OtpEntity otpEntity = otpService.validateReceivedOtp(resetPasswordRequest.getToken());
         appUser.setPassword(resetPasswordRequest.getNewPassword());
         if(!appUser.getPassword().equals(resetPasswordRequest.getConfirmPassword()))
             throw new InvalidDetailsException("Password doesn't match");
         customerRepository.save(customer);
-        otpService.deleteToken(receivedToken);
+        otpService.deleteToken(otpEntity);
         return "Password reset successful";
     }
 
@@ -464,8 +448,8 @@ public class CustomerServiceImpl implements CustomerService {
     public String deleteTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId) {
         Customer customer = getCustomerById(customerId);
         List<Transaction> transactions = customer.getAccount().getTransactions();
-        transactions.removeIf(transact ->
-                transact.getId().equals(transactionId));
+        transactions.removeIf(transaction ->
+                transaction.getId().equals(transactionId));
         return "Transaction deleted";
     }
 

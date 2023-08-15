@@ -1,12 +1,11 @@
 package com.bank.E_Bank_App.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
 @Builder
 @Getter
-public class AuthenticationResponse {
+public class LoginResponse {
     private String message;
     private boolean isAuthenticated;
     private JwtResponse jwtResponse;
