@@ -1,12 +1,10 @@
 package com.bank.E_Bank_App.controller;
 
-import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
 import com.bank.E_Bank_App.dto.request.LoginRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
-import com.bank.E_Bank_App.service.admin.AdminService;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -18,11 +16,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/v1/auth/")
 @AllArgsConstructor
 
-public class authController {
+public class AuthController {
     private final CustomerService customerService;
-    private final AdminService adminService;
 
-    @PostMapping("user/register")
+    @PostMapping("customer/register")
     public ResponseEntity<?> registerCustomer(@Valid @RequestBody RegisterRequest registerRequest){
         RegisterResponse registerResponse = customerService.register(registerRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(registerResponse);
@@ -38,21 +35,9 @@ public class authController {
         return ResponseEntity.status(HttpStatus.OK).body(customerLoginResponse);
     }
 
-    @PostMapping("admin/login")
-    public ResponseEntity<?> adminLogin(@Valid @RequestBody AdminLoginRequest adminLoginRequest){
-        LoginResponse adminLoginResponse = adminService.authenticate(adminLoginRequest);
-        return ResponseEntity.status(HttpStatus.OK).body(adminLoginResponse);
-    }
-
     @PostMapping("resend_verification_mail/{customer_id}")
     public ResponseEntity<?> resendVerificationMail(@Valid @PathVariable Long customer_id){
         String mailResponse = customerService.resendVerificationMail(customer_id);
         return ResponseEntity.ok(mailResponse);
-    }
-
-    @GetMapping("send_reset_password_mail/{customer_id}")
-    public ResponseEntity<?> sendResetPasswordMail(@Valid @PathVariable Long customer_id){
-        String resetPasswordMailResponse = customerService.sendResetPasswordMail(customer_id);
-        return ResponseEntity.ok(resetPasswordMailResponse);
     }
 }

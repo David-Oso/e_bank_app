@@ -34,6 +34,6 @@ public class UpdateCustomerRequest {
     @Pattern(regexp = E_BankUtils.DATE_OF_BIRTH_REGEX, message = "incorrect date of birth format")
     private String dateOfBirth;
 
-    @Pattern(regexp = E_BankUtils.PASSWORD_REGEX_STRING, message = "enter a valid passord")
+    @Pattern(regexp = E_BankUtils.PASSWORD_REGEX_STRING, message = "enter a valid password")
     private String newPassword;
 }

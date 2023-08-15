@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/user")
+@RequestMapping("/api/v1/customer")
 @AllArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;
@@ -67,6 +67,12 @@ public class CustomerController {
     public ResponseEntity<?> updateCustomer(@Valid @RequestBody UpdateCustomerRequest updateCustomerRequest){
         String updateCustomerResponse = customerService.updateCustomer(updateCustomerRequest);
         return ResponseEntity.status(HttpStatus.OK).body(updateCustomerResponse);
+    }
+
+    @GetMapping("send_reset_password_mail/{customer_id}")
+    public ResponseEntity<?> sendResetPasswordMail(@Valid @PathVariable Long customer_id){
+        String resetPasswordMailResponse = customerService.sendResetPasswordMail(customer_id);
+        return ResponseEntity.ok(resetPasswordMailResponse);
     }
     @PostMapping("reset/password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest){

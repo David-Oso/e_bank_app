@@ -1,9 +1,13 @@
 package com.bank.E_Bank_App.service.customer;
 
+import com.bank.E_Bank_App.config.security.jwtToken.EBankToken;
+import com.bank.E_Bank_App.config.security.jwtToken.EBankTokenService;
+import com.bank.E_Bank_App.config.security.services.JwtService;
 import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
+import com.bank.E_Bank_App.dto.response.JwtResponse;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
@@ -19,6 +23,10 @@ import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -41,13 +49,15 @@ public class CustomerServiceImpl implements CustomerService {
     private final ModelMapper modelMapper;
     private final CloudService cloudService;
     private EmailRequest emailRequest;
-    //    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final EBankTokenService eBankTokenService;
+    private final AuthenticationManager authenticationManager;
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
         checkIfEmailAlreadyExists(registerRequest.getEmail());
         Customer customer = new Customer();
         AppUser appUser = getNewAppUser(registerRequest);
-
         Customer savedCustomer = getNewCustomer(registerRequest, customer, appUser);
         String otp = otpService.generateAndSaveOtp(savedCustomer);
         log.info("\n\n:::::::::::::::::::: GENERATED OTP -> %s ::::::::::::::::::::\n".formatted(otp));
@@ -65,16 +75,15 @@ public class CustomerServiceImpl implements CustomerService {
             AppUser appUser = customer.getAppUser();
             if(!appUser.isEnable()) resendVerificationMail(customer.getId());
             else if (appUser.isLocked())
-                throw new E_BankException("Account has been locked for some time");
+                throw new E_BankException("Account has been blocked");
         }
     }
 
     private AppUser getNewAppUser(RegisterRequest registerRequest) {
         AppUser appUser = modelMapper.map(registerRequest, AppUser.class);
         appUser.setRole(Role.CUSTOMER);
-//        String encodedPassword = passwordEncoder.encode(request.getPassword());
-//        appUser.setPassword(encodedPassword);
-        appUser.setPassword(registerRequest.getPassword());
+        String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
+        appUser.setPassword(encodedPassword);
         return appUser;
     }
 
@@ -93,10 +102,7 @@ public class CustomerServiceImpl implements CustomerService {
         return LocalDate.parse(date, formatter);
     }
     private int changeDateToIntAndValidateAge(LocalDate date) {
-        int years = Period.between(date, LocalDate.now()).getYears();
-        if(years < 16)
-            throw new E_BankException("Cannot register this account because you are less than 16 years old");
-        else return years;
+        return Period.between(date, LocalDate.now()).getYears();
     }
 
     private void sendVerificationMail(Customer customer, String otp){
@@ -134,16 +140,30 @@ public class CustomerServiceImpl implements CustomerService {
                 .gender(customer.getGender())
                 .email(customer.getAppUser().getEmail())
                 .phoneNumber(customer.getAppUser().getPhoneNumber())
-//                .jwtResponse()
+                .jwtResponse(getJwtTokenResponse(customer.getAppUser()))
                 .build();
     }
 
-//    @Override
-//    public void sendVerificationMail(Long customerId) {
-//        Customer customer = getCustomerById(customerId);
-//        String token = otpService.generateAndSaveOtp(customer);
-//        sendVerificationMail(customer, token);
-//    }
+    private JwtResponse getJwtTokenResponse(AppUser user){
+        final String email = user.getEmail();
+        final String accessToken = jwtService.generateAccessToken(email);
+        final String refreshToken = jwtService.generateRefreshToken(email);
+        saveEBankToken(user, accessToken);
+        return JwtResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    private void saveEBankToken(AppUser user, String accessToken) {
+        final EBankToken eBankToken = EBankToken.builder()
+                .token(accessToken)
+                .appUser(user)
+                .isExpired(false)
+                .isRevoked(false)
+                .build();
+        eBankTokenService.saveToken(eBankToken);
+    }
 
     @Override
     public String resendVerificationMail(Long customerId) {
@@ -156,14 +176,22 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public LoginResponse authenticate(LoginRequest loginRequest) {
-        Customer customer = getCustomerByEmail(loginRequest.getEmail());
-        AppUser appUser = customer.getAppUser();
-        if(!appUser.getPassword().equals(loginRequest.getPassword()))
-            throw new InvalidDetailsException("Incorrect Password");
-        else return LoginResponse.builder()
-                .message("Authentication successful")
-                .isAuthenticated(true)
-//                .jwtResponse()
+//        Customer customer = getCustomerByEmail(loginRequest.getEmail());
+//        AppUser appUser = customer.getAppUser();
+//        if(!appUser.getPassword().equals(loginRequest.getPassword()))
+//            throw new InvalidDetailsException("Incorrect Password");
+//        else return LoginResponse.builder()
+//                .message("Authentication successful")
+//                .isAuthenticated(true)
+////                .jwtResponse()
+//                .build();
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        String email = authentication.getPrincipal().toString();
+        Customer customer = getCustomerByEmail(email);
+        JwtResponse jwtResponse = getJwtTokenResponse(customer.getAppUser());
+        return LoginResponse.builder()
+                .jwtResponse(jwtResponse)
                 .build();
     }
 
