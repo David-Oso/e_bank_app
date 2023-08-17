@@ -3,6 +3,7 @@ package com.bank.E_Bank_App.controller;
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Transaction;
 import com.bank.E_Bank_App.dto.request.*;
+import com.bank.E_Bank_App.dto.response.UpdateCustomerResponse;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -65,7 +66,7 @@ public class CustomerController {
 
     @PutMapping("update")
     public ResponseEntity<?> updateCustomer(@Valid @RequestBody UpdateCustomerRequest updateCustomerRequest){
-        String updateCustomerResponse = customerService.updateCustomer(updateCustomerRequest);
+        UpdateCustomerResponse updateCustomerResponse = customerService.updateCustomer(updateCustomerRequest);
         return ResponseEntity.status(HttpStatus.OK).body(updateCustomerResponse);
     }
 

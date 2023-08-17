@@ -7,10 +7,7 @@ import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
-import com.bank.E_Bank_App.dto.response.JwtResponse;
-import com.bank.E_Bank_App.dto.response.LoginResponse;
-import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
-import com.bank.E_Bank_App.dto.response.RegisterResponse;
+import com.bank.E_Bank_App.dto.response.*;
 import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
 import com.bank.E_Bank_App.exception.NotFoundException;
@@ -60,10 +57,10 @@ public class CustomerServiceImpl implements CustomerService {
         AppUser appUser = getNewAppUser(registerRequest);
         Customer savedCustomer = getNewCustomer(registerRequest, customer, appUser);
         String otp = otpService.generateAndSaveOtp(savedCustomer);
-        log.info("\n\n:::::::::::::::::::: GENERATED OTP -> %s ::::::::::::::::::::\n".formatted(otp));
+//        log.info("\n\n:::::::::::::::::::: GENERATED OTP -> %s ::::::::::::::::::::\n".formatted(otp));
         sendVerificationMail(savedCustomer, otp);
         return RegisterResponse.builder()
-                .message("Check your mail for verification token to activate your account")
+                .message("Check your mail for otp to activate your account")
                 .isSuccess(true)
                 .build();
     }
@@ -176,15 +173,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public LoginResponse authenticate(LoginRequest loginRequest) {
-//        Customer customer = getCustomerByEmail(loginRequest.getEmail());
-//        AppUser appUser = customer.getAppUser();
-//        if(!appUser.getPassword().equals(loginRequest.getPassword()))
-//            throw new InvalidDetailsException("Incorrect Password");
-//        else return LoginResponse.builder()
-//                .message("Authentication successful")
-//                .isAuthenticated(true)
-////                .jwtResponse()
-//                .build();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         String email = authentication.getPrincipal().toString();
@@ -226,8 +214,9 @@ public class CustomerServiceImpl implements CustomerService {
         account.setAccountNumber(accountNumber);
         account.setPin(setUpAccountRequest.getPin());
         customerRepository.save(customer);
-        return "Account is set up";
+        return "Account set up successful";
     }
+
 
     private String generateAccountNumber() {
         SecureRandom randomNumbers = new SecureRandom();
@@ -386,11 +375,9 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String updateCustomer(UpdateCustomerRequest updateCustomerRequest) {
+    public UpdateCustomerResponse updateCustomer(UpdateCustomerRequest updateCustomerRequest) {
         Customer customer = getCustomerById(updateCustomerRequest.getUserId());
         AppUser appUser = customer.getAppUser();
-        if(!appUser.getPassword().equals(updateCustomerRequest.getPassword()))
-            throw new InvalidDetailsException("Incorrect password");
         appUser.setFirstName(updateCustomerRequest.getFirstName());
         appUser.setLastName(updateCustomerRequest.getLastName());
         customer.setGender(updateCustomerRequest.getGender());
@@ -398,10 +385,26 @@ public class CustomerServiceImpl implements CustomerService {
         int age = changeDateToIntAndValidateAge(dateOfBirth);
         customer.setDateOfBirth(dateOfBirth);
         customer.setAge(age);
-        appUser.setPassword(updateCustomerRequest.getNewPassword());
         customer.setUpdatedAt(LocalDateTime.now());
-        customerRepository.save(customer);
-        return "Customer Updated Successfully";
+        Customer savedCustomer = customerRepository.save(customer);
+        return getUpdateCustomerResponse(savedCustomer);
+    }
+
+    @Override
+    public String updatePassword(UpdatePasswordRequest updatePasswordRequest) {
+        return null;
+    }
+
+    private static UpdateCustomerResponse getUpdateCustomerResponse(Customer savedCustomer) {
+        return UpdateCustomerResponse.builder()
+                .id(savedCustomer.getId())
+                .lastName(savedCustomer.getAppUser().getLastName())
+                .firstName(savedCustomer.getAppUser().getFirstName())
+                .phoneNumber(savedCustomer.getAppUser().getPhoneNumber())
+                .email(savedCustomer.getAppUser().getEmail())
+                .age(savedCustomer.getAge())
+                .gender(savedCustomer.getGender())
+                .build();
     }
 
     private BigDecimal calculateBalance(Long customerId){

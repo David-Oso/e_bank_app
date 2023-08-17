@@ -6,6 +6,7 @@ import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
+import com.bank.E_Bank_App.dto.response.UpdateCustomerResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,7 +24,8 @@ public interface CustomerService {
     String makeWithdraw(WithDrawRequest withDrawRequest);
     String makeTransfer(TransferRequest transferRequest);
     BigDecimal getBalance(Long customerId, String pin);
-    String updateCustomer(UpdateCustomerRequest updateCustomerRequest);
+    UpdateCustomerResponse updateCustomer(UpdateCustomerRequest updateCustomerRequest);
+    String updatePassword(UpdatePasswordRequest updatePasswordRequest);
     String sendResetPasswordMail(Long customerId);
     String resetPassword(ResetPasswordRequest resetPasswordRequest);
     String uploadImage(UploadImageRequest uploadImageRequest);

@@ -1,5 +1,5 @@
 <p>
-    <h4>Dear %s,</h4><br/><br/>
+    <h4>Dear %s,</h4>
     <strong>Welcome to E_Bank Nigeria</strong> where we help you to perform any kind
     transaction at your comfort without the need of going to the bank.
     As a valued customer, we're excited to have you join our application users. <br/>

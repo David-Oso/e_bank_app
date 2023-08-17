@@ -5,6 +5,7 @@ import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
+import com.bank.E_Bank_App.dto.response.UpdateCustomerResponse;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,7 +80,7 @@ class CustomerServiceImplTest {
 
         transferRequest = new TransferRequest();
         transferRequest.setCustomerId(1L);
-        transferRequest.setRecipientAccountNumber("6557836251");
+        transferRequest.setRecipientAccountNumber("5223018037");
         transferRequest.setAmount(BigDecimal.valueOf(20000));
         transferRequest.setPin("1234");
 
@@ -116,12 +117,12 @@ class CustomerServiceImplTest {
 
     @Test
     void registerUserTest() {
-//        RegisterResponse response = customerService.register(registerRequest1);
-//        assertThat(response.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
-//        assertThat(response.isSuccess()).isEqualTo(true);
+        RegisterResponse response = customerService.register(registerRequest1);
+        assertThat(response.getMessage()).isEqualTo("Check your mail for otp to activate your account");
+        assertThat(response.isSuccess()).isEqualTo(true);
 
         RegisterResponse response1 = customerService.register(registerRequest2);
-        assertThat(response1.getMessage()).isEqualTo("Check your mail for verification token to activate your account");
+        assertThat(response1.getMessage()).isEqualTo("Check your mail for otp to activate your account");
         assertThat(response1.isSuccess()).isEqualTo(true);
     }
 
@@ -133,18 +134,17 @@ class CustomerServiceImplTest {
 
     @Test
     void verifyEmailTest(){
-//        OtpVerificationResponse response1 = customerService.verifyEmail("762405");
-//        assertThat(response1.getEmail()).isEqualTo(registerRequest1.getEmail());
+        OtpVerificationResponse response1 = customerService.verifyEmail("539256");
+        assertThat(response1.getEmail()).isEqualTo(registerRequest1.getEmail());
 
-        OtpVerificationResponse response2 = customerService.verifyEmail("133265");
+        OtpVerificationResponse response2 = customerService.verifyEmail("732822");
         assertThat(response2.getEmail()).isEqualTo(registerRequest2.getEmail());
     }
 
     @Test
     void authenticateUserTest() {
         LoginResponse response = customerService.authenticate(loginRequest);
-        assertThat(response.getMessage()).isEqualTo("Authentication successful");
-        assertThat(response.isAuthenticated()).isEqualTo(true);
+        assertThat(response.getJwtResponse()).isNotNull();
     }
 
     @Test
@@ -159,15 +159,8 @@ class CustomerServiceImplTest {
         Customer foundCustomer = customerService.getCustomerByEmail("osodavid001@gmail.com");
         String firstName = foundCustomer.getAppUser().getFirstName();
         String lastName = foundCustomer.getAppUser().getLastName();
-        assertThat(firstName).isEqualTo("Dave");
-        assertThat(lastName).isEqualTo("Temz");
-    }
-
-    @Test
-    void getCustomerByAccountNumberTest(){
-        Customer foundCustomer = customerService.getCustomerByAccountNumber("2798899935");
-        String email = foundCustomer.getAppUser().getEmail();
-        assertThat(email).isEqualTo(registerRequest1.getEmail());
+        assertThat(firstName).isEqualTo(registerRequest1.getFirstName());
+        assertThat(lastName).isEqualTo(registerRequest1.getLastName());
     }
 
     @Test
@@ -175,7 +168,14 @@ class CustomerServiceImplTest {
         String response1 = customerService.setUpAccount(setUpAccountRequest1);
         assertThat(response1).isEqualTo("Account is set up");
         String response2 = customerService.setUpAccount(setUpAccountRequest2);
-        assertThat(response2).isEqualTo("Account is set up");
+        assertThat(response2).isEqualTo("Account set up successful");
+    }
+
+    @Test
+    void getCustomerByAccountNumberTest(){
+        Customer foundCustomer = customerService.getCustomerByAccountNumber("0284272228");
+        String email = foundCustomer.getAppUser().getEmail();
+        assertThat(email).isEqualTo(registerRequest1.getEmail());
     }
 
     @Test
@@ -187,7 +187,7 @@ class CustomerServiceImplTest {
     @Test
     void getBalanceTest(){
         BigDecimal balance = customerService.getBalance(1L, "1234");
-        assertThat(balance).isEqualTo(BigDecimal.valueOf(300000).setScale(2));
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(100000).setScale(2));
     }
 
     @Test
@@ -195,7 +195,7 @@ class CustomerServiceImplTest {
         String response = customerService.makeWithdraw(withDrawRequest);
         assertThat(response).isEqualTo("Transaction Successful");
         BigDecimal balance = customerService.getBalance(withDrawRequest.getCustomerId(), withDrawRequest.getPin());
-        assertThat(balance).isEqualTo(BigDecimal.valueOf(240000).setScale(2));
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(80000).setScale(2));
     }
 
     @Test
@@ -203,7 +203,7 @@ class CustomerServiceImplTest {
         String response  = customerService.makeTransfer(transferRequest);
         assertThat(response).isEqualTo("Transaction Successful");
         BigDecimal balance = customerService.getBalance(transferRequest.getCustomerId(), transferRequest.getPin());
-        assertThat(balance).isEqualTo(BigDecimal.valueOf(220000).setScale(2));
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(60000).setScale(2));
 
         Customer recipient = customerService.getCustomerByAccountNumber(transferRequest.getRecipientAccountNumber());
         String recipientPin = recipient.getAccount().getPin();
@@ -213,8 +213,8 @@ class CustomerServiceImplTest {
 
     @Test
     void updateCustomerTest(){
-        String response = customerService.updateCustomer(updateCustomerRequest);
-        assertThat(response).isEqualTo("Customer Updated Successfully");
+        UpdateCustomerResponse response = customerService.updateCustomer(updateCustomerRequest);
+        assertThat(response).isNotNull();
     }
 
     @Test

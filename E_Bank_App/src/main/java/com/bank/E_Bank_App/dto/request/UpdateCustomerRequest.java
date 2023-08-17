@@ -20,9 +20,6 @@ public class UpdateCustomerRequest {
     @NotNull(message = "field customer id cannot be null")
     private Long userId;
 
-    @Pattern(regexp = E_BankUtils.PASSWORD_REGEX_STRING, message = "enter a valid password")
-    private String password;
-
     @Pattern(regexp = E_BankUtils.NAME_REGEX, message = "enter a valid name")
     private String firstName;
 
@@ -33,7 +30,4 @@ public class UpdateCustomerRequest {
 
     @Pattern(regexp = E_BankUtils.DATE_OF_BIRTH_REGEX, message = "incorrect date of birth format")
     private String dateOfBirth;
-
-    @Pattern(regexp = E_BankUtils.PASSWORD_REGEX_STRING, message = "enter a valid password")
-    private String newPassword;
 }
