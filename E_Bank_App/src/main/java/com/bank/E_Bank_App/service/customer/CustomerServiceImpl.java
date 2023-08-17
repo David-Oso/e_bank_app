@@ -16,7 +16,6 @@ import com.bank.E_Bank_App.service.mail.MailService;
 import com.bank.E_Bank_App.otp.OtpService;
 import com.bank.E_Bank_App.service.cloud.CloudService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
-import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,7 +32,6 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -172,15 +170,19 @@ public class CustomerServiceImpl implements CustomerService {
 
 
     @Override
-    public LoginResponse authenticate(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        String email = authentication.getPrincipal().toString();
-        Customer customer = getCustomerByEmail(email);
+    public LoginResponse login(LoginRequest loginRequest) {
+        Customer customer = authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
         JwtResponse jwtResponse = getJwtTokenResponse(customer.getAppUser());
         return LoginResponse.builder()
                 .jwtResponse(jwtResponse)
                 .build();
+    }
+
+    private Customer authenticateUser(String email, String password) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password));
+        String userEmail = authentication.getPrincipal().toString();
+        return getCustomerByEmail(userEmail);
     }
 
     @Override
@@ -390,11 +392,6 @@ public class CustomerServiceImpl implements CustomerService {
         return getUpdateCustomerResponse(savedCustomer);
     }
 
-    @Override
-    public String updatePassword(UpdatePasswordRequest updatePasswordRequest) {
-        return null;
-    }
-
     private static UpdateCustomerResponse getUpdateCustomerResponse(Customer savedCustomer) {
         return UpdateCustomerResponse.builder()
                 .id(savedCustomer.getId())
@@ -405,6 +402,19 @@ public class CustomerServiceImpl implements CustomerService {
                 .age(savedCustomer.getAge())
                 .gender(savedCustomer.getGender())
                 .build();
+    }
+
+    @Override
+    public String changePassword(ChangePasswordRequest changePasswordRequest) {
+        Customer customer = getCustomerById(changePasswordRequest.getUserId());
+        AppUser appUser = customer.getAppUser();
+        Customer authenticatedCustomer =
+                authenticateUser(appUser.getEmail(), changePasswordRequest.getPassword());
+        String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+        authenticatedCustomer.getAppUser()
+                .setPassword(encodedPassword);
+        customerRepository.save(authenticatedCustomer);
+        return "Customer password updated successfully";
     }
 
     private BigDecimal calculateBalance(Long customerId){

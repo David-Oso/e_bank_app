@@ -88,9 +88,7 @@ class CustomerServiceImplTest {
         updateCustomerRequest.setUserId(2L);
         updateCustomerRequest.setFirstName("NewFirstName");
         updateCustomerRequest.setLastName("NewLastName");
-        updateCustomerRequest.setPassword("NewPassword");
         updateCustomerRequest.setGender(Gender.MALE);
-        updateCustomerRequest.setNewPassword("NewPassword");
         updateCustomerRequest.setDateOfBirth("21/08/2004");
 
         resetPasswordRequest = new ResetPasswordRequest();
@@ -143,7 +141,7 @@ class CustomerServiceImplTest {
 
     @Test
     void authenticateUserTest() {
-        LoginResponse response = customerService.authenticate(loginRequest);
+        LoginResponse response = customerService.login(loginRequest);
         assertThat(response.getJwtResponse()).isNotNull();
     }
 
@@ -215,6 +213,16 @@ class CustomerServiceImplTest {
     void updateCustomerTest(){
         UpdateCustomerResponse response = customerService.updateCustomer(updateCustomerRequest);
         assertThat(response).isNotNull();
+    }
+
+    @Test
+    void updatePasswordTest(){
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
+        changePasswordRequest.setUserId(2L);
+        changePasswordRequest.setPassword("Password");
+        changePasswordRequest.setNewPassword("NewPassword");
+        String changePasswordResponse = customerService.changePassword(changePasswordRequest);
+        assertThat(changePasswordResponse).isEqualTo("Customer password updated successfully");
     }
 
     @Test

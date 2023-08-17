@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UpdatePasswordRequest {
+public class ChangePasswordRequest {
     @NotNull(message = "field customer id cannot be null")
     private Long userId;
 

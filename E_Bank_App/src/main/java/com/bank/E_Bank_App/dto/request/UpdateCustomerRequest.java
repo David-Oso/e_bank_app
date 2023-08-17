@@ -1,6 +1,5 @@
 package com.bank.E_Bank_App.dto.request;
 
-import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import jakarta.validation.constraints.NotNull;
@@ -9,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor

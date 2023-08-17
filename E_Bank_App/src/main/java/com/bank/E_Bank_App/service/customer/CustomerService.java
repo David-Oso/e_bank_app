@@ -15,7 +15,7 @@ public interface CustomerService {
     RegisterResponse register(RegisterRequest registerRequest);
     String resendVerificationMail(Long customerId);
     OtpVerificationResponse verifyEmail(String otp);
-    LoginResponse authenticate(LoginRequest loginRequest);
+    LoginResponse login(LoginRequest loginRequest);
     Customer getCustomerById(Long customerId);
     Customer getCustomerByEmail(String email);
     Customer getCustomerByAccountNumber(String accountNumber);
@@ -25,7 +25,7 @@ public interface CustomerService {
     String makeTransfer(TransferRequest transferRequest);
     BigDecimal getBalance(Long customerId, String pin);
     UpdateCustomerResponse updateCustomer(UpdateCustomerRequest updateCustomerRequest);
-    String updatePassword(UpdatePasswordRequest updatePasswordRequest);
+    String changePassword(ChangePasswordRequest changePasswordRequest);
     String sendResetPasswordMail(Long customerId);
     String resetPassword(ResetPasswordRequest resetPasswordRequest);
     String uploadImage(UploadImageRequest uploadImageRequest);
