@@ -12,8 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @Getter
 public class UploadImageRequest {
-    @NotNull(message = "User id cannot be null")
+    @NotNull(message = "user id cannot be null")
     private Long customerId;
 
+    @NotNull(message = "field profile image cannot be null")
     private MultipartFile profileImage;
 }

@@ -25,6 +25,6 @@ public class UpdateCustomerRequest {
 
     private Gender gender;
 
-    @Pattern(regexp = E_BankUtils.DATE_OF_BIRTH_REGEX, message = "incorrect date of birth format")
+//    @Pattern(regexp = E_BankUtils.DATE_OF_BIRTH_REGEX, message = "incorrect date of birth format")
     private String dateOfBirth;
 }

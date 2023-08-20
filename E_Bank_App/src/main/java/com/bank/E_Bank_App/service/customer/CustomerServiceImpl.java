@@ -413,11 +413,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String resetPassword(ResetPasswordRequest resetPasswordRequest) {
-        Customer customer = getCustomerByEmail(resetPasswordRequest.getEmail());
+        OtpEntity otpEntity = otpService.validateReceivedOtp(resetPasswordRequest.getOtp());
+        Customer customer = otpEntity.getCustomer();
         AppUser appUser = customer.getAppUser();
-        OtpEntity otpEntity = otpService.validateReceivedOtp(resetPasswordRequest.getToken());
-        appUser.setPassword(resetPasswordRequest.getNewPassword());
-        if(!appUser.getPassword().equals(resetPasswordRequest.getConfirmPassword()))
+        String encodedPassword = passwordEncoder.encode(resetPasswordRequest.getNewPassword());
+        appUser.setPassword(encodedPassword);
+        if(!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getConfirmPassword()))
             throw new InvalidDetailsException("Password doesn't match");
         customerRepository.save(customer);
         otpService.deleteToken(otpEntity);

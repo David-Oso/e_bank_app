@@ -14,7 +14,6 @@ public class E_BankUtils {
     public static final String PHONE_NUMBER_REGEX = "^(\\+?234|0)[789][01]\\d{8}$";
     public static final String PIN_REGEX = "^\\d{4}$";
     public static final String AMOUNT_REGEX = "^\\d";
-    public static final String ADMIN_IDENTITY_REGEX = "";
     public static final String ACCOUNT_NUMBER_REGEX = "^\\d{10}$";
     public static final String DATE_OF_BIRTH_REGEX = "dd/MM/yyyy";
     public static final String BANK_NAME = "E_Bank Nigeria";

@@ -6,6 +6,7 @@ import com.bank.E_Bank_App.data.model.AppUser;
 import com.bank.E_Bank_App.data.model.Role;
 import com.bank.E_Bank_App.data.repository.AdminRepository;
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
+import com.bank.E_Bank_App.dto.response.JwtResponse;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
 import com.bank.E_Bank_App.exception.NotFoundException;
@@ -48,9 +49,11 @@ public class AdminServiceImpl implements AdminService {
     public LoginResponse authenticate(AdminLoginRequest request) {
         AppUser appUser = appUserService
                 .authenticate(request.getEmail(), request.getPassword());
+        JwtResponse jwtResponse = appUserService.getJwtTokenResponse(appUser);
         Admin admin = getAdminByEmail(appUser.getEmail());
         if(admin.getIdentity().equals(request.getIdentity())){
             return LoginResponse.builder()
+                    .jwtResponse(jwtResponse)
                     .build();
         }
         throw new InvalidDetailsException("Incorrect identity entered");

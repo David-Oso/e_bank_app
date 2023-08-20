@@ -1,10 +1,7 @@
 package com.bank.E_Bank_App.dto.request;
 
 import com.bank.E_Bank_App.utils.E_BankUtils;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,9 +24,9 @@ public class TransferRequest {
     private String recipientAccountNumber;
 
     @NotNull(message = "field amount cannot be null")
-    @NotBlank(message = "field amount cannot be blank")
-    @NotEmpty(message = "field amount cannot be empty")
-    @Pattern(regexp = E_BankUtils.AMOUNT_REGEX, message = "amount must be digit")
+    @DecimalMin(value = "200.00", message = "minimum withdraw amount is 200.00")
+    @DecimalMax(value = "50000000.00", message = "maximum withdraw amount is 50000000.00")
+//    @Pattern(regexp = E_BankUtils.AMOUNT_REGEX, message = "amount must be digit")
     private BigDecimal amount;
 
     @NotNull(message = "field pin cannot be null")

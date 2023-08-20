@@ -1,6 +1,7 @@
 package com.bank.E_Bank_App.config.security.config;
 
 import com.bank.E_Bank_App.config.security.filter.EBankAuthorizationFilter;
+import com.bank.E_Bank_App.config.security.util.EBankAuthenticationEntryPoint;
 import com.bank.E_Bank_App.config.security.util.WhiteList;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @AllArgsConstructor
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
-    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final EBankAuthenticationEntryPoint authenticationEntryPoint;
     private final EBankAuthorizationFilter authorizationFilter;
 
     @Bean
