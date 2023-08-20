@@ -84,7 +84,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private Customer getNewCustomer(RegisterRequest registerRequest, Customer customer, AppUser appUser) {
         customer.setAppUser(appUser);
-        LocalDate dateOfBirth = convertDateOBirthToLocalDate(registerRequest.getDateOfBirth());
+        LocalDate dateOfBirth = convertDateOfBirthToLocalDate(registerRequest.getDateOfBirth());
         customer.setDateOfBirth(dateOfBirth);
         int age = changeDateToIntAndValidateAge(customer.getDateOfBirth());
         customer.setAge(age);
@@ -92,9 +92,9 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.save(customer);
     }
 
-    private LocalDate convertDateOBirthToLocalDate(String date) {
+    private LocalDate convertDateOfBirthToLocalDate(String date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return LocalDate.parse(date, formatter);
+        return LocalDate.parse(date.trim(), formatter);
     }
     private int changeDateToIntAndValidateAge(LocalDate date) {
         return Period.between(date, LocalDate.now()).getYears();
@@ -204,7 +204,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String setUpAccount(SetUpAccountRequest setUpAccountRequest) {
+    public SetUpAccountResponse setUpAccount(SetUpAccountRequest setUpAccountRequest) {
         Customer customer = getCustomerById(setUpAccountRequest.getCustomerId());
         String firstName = customer.getAppUser().getFirstName();
         String lastName = customer.getAppUser().getLastName();
@@ -216,7 +216,11 @@ public class CustomerServiceImpl implements CustomerService {
         account.setAccountNumber(accountNumber);
         account.setPin(setUpAccountRequest.getPin());
         customerRepository.save(customer);
-        return "Account set up successful";
+        return SetUpAccountResponse.builder()
+                .message("Account set up successful")
+                .accountName(accountName)
+                .accountNumber(accountNumber)
+                .build();
     }
 
 
@@ -383,7 +387,7 @@ public class CustomerServiceImpl implements CustomerService {
         appUser.setFirstName(updateCustomerRequest.getFirstName());
         appUser.setLastName(updateCustomerRequest.getLastName());
         customer.setGender(updateCustomerRequest.getGender());
-        LocalDate dateOfBirth = convertDateOBirthToLocalDate(updateCustomerRequest.getDateOfBirth());
+        LocalDate dateOfBirth = convertDateOfBirthToLocalDate(updateCustomerRequest.getDateOfBirth());
         int age = changeDateToIntAndValidateAge(dateOfBirth);
         customer.setDateOfBirth(dateOfBirth);
         customer.setAge(age);

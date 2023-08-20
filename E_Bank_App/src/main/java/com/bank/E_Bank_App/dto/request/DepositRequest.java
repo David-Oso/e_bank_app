@@ -1,5 +1,6 @@
 package com.bank.E_Bank_App.dto.request;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +20,6 @@ public class DepositRequest {
     private Long customerId;
 
     @NotNull(message = "field amount cannot be null")
-    @NotBlank(message = "field amount cannot be blank")
-    @NotEmpty(message = "field amount cannot be empty")
+    @DecimalMin(value = "0.01", inclusive = true, message = "Amount must be greater than or equal to 0.01")
     private BigDecimal amount;
 }

@@ -1,10 +1,7 @@
 package com.bank.E_Bank_App.dto.request;
 
 import com.bank.E_Bank_App.data.model.Gender;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import static com.bank.E_Bank_App.utils.E_BankUtils.*;
@@ -42,12 +39,11 @@ public class RegisterRequest {
             "contain at least one capital letter, one small letter, a number and special character(@$!%*?&)")
     private String password;
 
-    @NotBlank(message = "field gender cannot be blank")
-    @NotEmpty(message = "field gender cannot be empty")
+    @NotNull(message = "field gender cannot be null")
     private Gender gender;
 
     @NotBlank(message = "field date of birth cannot be blank")
     @NotEmpty(message = "field date of birth cannot be empty")
-    @Pattern(regexp = DATE_OF_BIRTH_REGEX, message = "Date should be in the format dd/MM/yyyy")
+//    @Pattern(regexp = DATE_OF_BIRTH_REGEX, message = "Date should be in the format dd/MM/yyyy")
     private String dateOfBirth;
 }

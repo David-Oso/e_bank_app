@@ -3,10 +3,7 @@ package com.bank.E_Bank_App.service.customer;
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Transaction;
 import com.bank.E_Bank_App.dto.request.*;
-import com.bank.E_Bank_App.dto.response.LoginResponse;
-import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
-import com.bank.E_Bank_App.dto.response.RegisterResponse;
-import com.bank.E_Bank_App.dto.response.UpdateCustomerResponse;
+import com.bank.E_Bank_App.dto.response.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,7 +16,7 @@ public interface CustomerService {
     Customer getCustomerById(Long customerId);
     Customer getCustomerByEmail(String email);
     Customer getCustomerByAccountNumber(String accountNumber);
-    String setUpAccount(SetUpAccountRequest setUpAccountRequest);
+    SetUpAccountResponse setUpAccount(SetUpAccountRequest setUpAccountRequest);
     String makeDeposit(DepositRequest depositRequest);
     String makeWithdraw(WithDrawRequest withDrawRequest);
     String makeTransfer(TransferRequest transferRequest);

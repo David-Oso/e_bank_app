@@ -2,10 +2,7 @@ package com.bank.E_Bank_App.service.implementations;
 
 import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.dto.request.*;
-import com.bank.E_Bank_App.dto.response.LoginResponse;
-import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
-import com.bank.E_Bank_App.dto.response.RegisterResponse;
-import com.bank.E_Bank_App.dto.response.UpdateCustomerResponse;
+import com.bank.E_Bank_App.dto.response.*;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -163,10 +160,12 @@ class CustomerServiceImplTest {
 
     @Test
     void setUpAccountTest(){
-        String response1 = customerService.setUpAccount(setUpAccountRequest1);
-        assertThat(response1).isEqualTo("Account is set up");
-        String response2 = customerService.setUpAccount(setUpAccountRequest2);
-        assertThat(response2).isEqualTo("Account set up successful");
+        SetUpAccountResponse response1 = customerService.setUpAccount(setUpAccountRequest1);
+        assertThat(response1.getMessage()).isEqualTo("Account is set up");
+        assertThat(response1.getAccountNumber()).isNotNull();
+        SetUpAccountResponse response2 = customerService.setUpAccount(setUpAccountRequest2);
+        assertThat(response2.getMessage()).isEqualTo("Account set up successful");
+        assertThat(response2.getAccountNumber()).isNotNull();
     }
 
     @Test

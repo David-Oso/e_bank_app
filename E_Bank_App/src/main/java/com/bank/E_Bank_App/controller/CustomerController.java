@@ -3,6 +3,7 @@ package com.bank.E_Bank_App.controller;
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Transaction;
 import com.bank.E_Bank_App.dto.request.*;
+import com.bank.E_Bank_App.dto.response.SetUpAccountResponse;
 import com.bank.E_Bank_App.dto.response.UpdateCustomerResponse;
 import com.bank.E_Bank_App.service.customer.CustomerService;
 import jakarta.validation.Valid;
@@ -39,7 +40,7 @@ public class CustomerController {
     }
     @PostMapping("set_up/account")
     public ResponseEntity<?> setUpAccount(@Valid @RequestBody SetUpAccountRequest setUpAccountRequest){
-        String setUpAccountResponse = customerService.setUpAccount(setUpAccountRequest);
+        SetUpAccountResponse setUpAccountResponse = customerService.setUpAccount(setUpAccountRequest);
         return ResponseEntity.status(HttpStatus.OK).body(setUpAccountResponse);
     }
     @PostMapping("deposit")

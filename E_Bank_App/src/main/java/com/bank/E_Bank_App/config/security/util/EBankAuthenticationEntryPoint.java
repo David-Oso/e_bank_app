@@ -16,5 +16,6 @@ public class EBankAuthenticationEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException authException) throws IOException{
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write(String.format("{\"Unauthorized\" : \"%s\"}",  authException.getMessage()));
     }
 }

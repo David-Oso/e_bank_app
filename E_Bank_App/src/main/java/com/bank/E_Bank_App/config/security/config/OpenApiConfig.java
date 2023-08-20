@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                         url = ""
                 ),
                 description = "OpenApi documentation for e bank app",
-                title = "OpenApi specification - David",
+                title = "OpenApi specification - E BANK",
                 version = "1.0",
                 license =  @License(
                         name = "License name",
