@@ -19,10 +19,8 @@ public class WithDrawRequest {
     private Long customerId;
 
     @NotNull(message = "field amount cannot be null")
-    @NotEmpty(message = "field amount cannot be empty")
-    @NotBlank(message = "field amount cannot be blank")
-    @Min(value = 200, message = "minimum withdraw amount exceeded")
-    @Max(value = 10000, message = "maximum withdraw amount exceeded")
+    @DecimalMin(value = "200.00", message = "minimum withdraw amount is 200")
+    @DecimalMax(value = "10000.00", message = "maximum withdraw amount is 10000.00")
     @Pattern(regexp= E_BankUtils.AMOUNT_REGEX, message = "enter digit")
     private BigDecimal amount;
 

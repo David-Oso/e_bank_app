@@ -7,6 +7,8 @@ import com.bank.E_Bank_App.data.model.Role;
 import com.bank.E_Bank_App.data.repository.AdminRepository;
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
+import com.bank.E_Bank_App.exception.InvalidDetailsException;
+import com.bank.E_Bank_App.exception.NotFoundException;
 import com.bank.E_Bank_App.service.appUser.AppUserService;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
@@ -21,7 +23,7 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
     private final AppUserService appUserService;
 
-    @PostConstruct
+//    @PostConstruct
     public void registerAdmin(){
         final String encodedPassword = passwordEncoder.encode(adminConfig.getAdminPassword());
     AppUser appUser = AppUser.builder()
@@ -42,10 +44,20 @@ public class AdminServiceImpl implements AdminService {
     adminRepository.save(admin);
     }
 
-
     @Override
     public LoginResponse authenticate(AdminLoginRequest request) {
-        AppUser authenticatedAppUser = appUserService.authenticate(request.getEmail(), request.getPassword());
-        return null;
+        AppUser appUser = appUserService
+                .authenticate(request.getEmail(), request.getPassword());
+        Admin admin = getAdminByEmail(appUser.getEmail());
+        if(admin.getIdentity().equals(request.getIdentity())){
+            return LoginResponse.builder()
+                    .build();
+        }
+        throw new InvalidDetailsException("Incorrect identity entered");
+    }
+
+    private Admin getAdminByEmail(String email){
+        return adminRepository.findAdminByAppUser_Email(email).orElseThrow(
+                ()-> new NotFoundException("Admin with this email not found"));
     }
 }

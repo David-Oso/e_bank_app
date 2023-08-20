@@ -1,8 +1,5 @@
 package com.bank.E_Bank_App.service.customer;
 
-import com.bank.E_Bank_App.config.security.jwtToken.EBankToken;
-import com.bank.E_Bank_App.config.security.jwtToken.EBankTokenService;
-import com.bank.E_Bank_App.config.security.services.JwtService;
 import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.*;
@@ -12,17 +9,14 @@ import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
 import com.bank.E_Bank_App.exception.NotFoundException;
 import com.bank.E_Bank_App.otp.OtpEntity;
-import com.bank.E_Bank_App.service.appUser.AppUserService;
-import com.bank.E_Bank_App.service.mail.MailService;
 import com.bank.E_Bank_App.otp.OtpService;
+import com.bank.E_Bank_App.service.appUser.AppUserService;
 import com.bank.E_Bank_App.service.cloud.CloudService;
+import com.bank.E_Bank_App.service.mail.MailService;
 import com.bank.E_Bank_App.utils.E_BankUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,9 +40,6 @@ public class CustomerServiceImpl implements CustomerService {
     private final CloudService cloudService;
     private EmailRequest emailRequest;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-    private final EBankTokenService eBankTokenService;
-//    private final AuthenticationManager authenticationManager;
     private final AppUserService appUserService;
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
@@ -128,6 +119,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private OtpVerificationResponse getOtpVerificationResponse(Customer customer) {
+        JwtResponse jwtResponse = appUserService.getJwtTokenResponse(customer.getAppUser());
         return OtpVerificationResponse.builder()
                 .id(customer.getId())
                 .firstName(customer.getAppUser().getFirstName())
@@ -136,29 +128,8 @@ public class CustomerServiceImpl implements CustomerService {
                 .gender(customer.getGender())
                 .email(customer.getAppUser().getEmail())
                 .phoneNumber(customer.getAppUser().getPhoneNumber())
-                .jwtResponse(getJwtTokenResponse(customer.getAppUser()))
+                .jwtResponse(jwtResponse)
                 .build();
-    }
-
-    private JwtResponse getJwtTokenResponse(AppUser user){
-        final String email = user.getEmail();
-        final String accessToken = jwtService.generateAccessToken(email);
-        final String refreshToken = jwtService.generateRefreshToken(email);
-        saveEBankToken(user, accessToken);
-        return JwtResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-    }
-
-    private void saveEBankToken(AppUser user, String accessToken) {
-        final EBankToken eBankToken = EBankToken.builder()
-                .token(accessToken)
-                .appUser(user)
-                .isExpired(false)
-                .isRevoked(false)
-                .build();
-        eBankTokenService.saveToken(eBankToken);
     }
 
     @Override
@@ -173,7 +144,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
         AppUser appUser = appUserService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-        JwtResponse jwtResponse = getJwtTokenResponse(appUser);
+        JwtResponse jwtResponse = appUserService.getJwtTokenResponse(appUser);
         return LoginResponse.builder()
                 .jwtResponse(jwtResponse)
                 .build();
@@ -194,7 +165,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer getCustomerByAccountNumber(String accountNumber) {
         return customerRepository.findByAccount_AccountNumber(accountNumber).orElseThrow(
-                ()-> new NotFoundException(String.format("Customer with account number %s not found", accountNumber)));
+                ()-> new NotFoundException("Customer with this account number not found"));
     }
 
     @Override
@@ -231,8 +202,8 @@ public class CustomerServiceImpl implements CustomerService {
         Account account = customer.getAccount();
         Transaction transaction = setTransaction(depositRequest.getAmount(), TransactionType.DEPOSIT);
         account.getTransactions().add(transaction);
-        sendDepositNotification(customer, depositRequest.getAmount());
-        customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+        sendDepositNotification(savedCustomer, depositRequest.getAmount());
         return "Transaction Successful";
     }
 
@@ -240,8 +211,6 @@ public class CustomerServiceImpl implements CustomerService {
         String mailTemplate = E_BankUtils.GET_DEPOSIT_NOTIFICATION_MAIL_TEMPLATE;
         String email = customer.getAppUser().getEmail();
         String firstName = customer.getAppUser().getFirstName();
-//        String fromCustomerFirstName = fromCustomer.getAppUser().getFirstName();
-//        String fromCustomerLastName = fromCustomer.getAppUser().getLastName();
         String lastName= customer.getAppUser().getLastName();
         String accountName = "%s %s".formatted(firstName, lastName);
         StringBuilder number = new StringBuilder(customer.getAccount().getAccountNumber());
@@ -270,8 +239,8 @@ public class CustomerServiceImpl implements CustomerService {
         checkWhetherBalanceIsSufficient(balance, withDrawRequest.getAmount());
         Transaction transaction = setTransaction(withDrawRequest.getAmount(), TransactionType.WITHDRAW);
         account.getTransactions().add(transaction);
-        sendWithdrawNotificationMail(customer, withDrawRequest.getAmount());
-        customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+        sendWithdrawNotificationMail(savedCustomer, withDrawRequest.getAmount());
         return "Transaction Successful";
     }
 
@@ -321,13 +290,13 @@ public class CustomerServiceImpl implements CustomerService {
 
         Transaction transaction = setTransaction(transferRequest.getAmount(), TransactionType.TRANSFER);
         account.getTransactions().add(transaction);
-        customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
 
         transaction.setTransactionType(TransactionType.DEPOSIT);
         recipientAccount.getTransactions().add(transaction);
-        sendTransferNotificationMail(customer, transferRequest.getAmount(), recipientAccount.getAccountNumber());
-        sendDepositNotification(recipient, transferRequest.getAmount());
-        customerRepository.save(recipient);
+        Customer savedRecipient = customerRepository.save(recipient);
+        sendTransferNotificationMail(savedCustomer, transferRequest.getAmount(), recipientAccount.getAccountNumber());
+        sendDepositNotification(savedRecipient, transferRequest.getAmount());
         return "Transaction Successful";
     }
 
@@ -374,6 +343,20 @@ public class CustomerServiceImpl implements CustomerService {
         throw new E_BankException("field customer id cannot be null");
     }
 
+    private BigDecimal calculateBalance(Long customerId){
+        Customer customer = getCustomerById(customerId);
+        BigDecimal balance = BigDecimal.ZERO;
+        List<Transaction> transactions = customer.getAccount().getTransactions();
+        for(Transaction transaction : transactions){
+            if(transaction.getTransactionType() == TransactionType.DEPOSIT)
+                balance = balance.add(transaction.getAmount());
+            if(transaction.getTransactionType() == TransactionType.WITHDRAW ||
+                    transaction.getTransactionType() == TransactionType.TRANSFER)
+                balance = balance.subtract(transaction.getAmount());
+        }
+        return balance;
+    }
+
     @Override
     public UpdateCustomerResponse updateCustomer(UpdateCustomerRequest updateCustomerRequest) {
         Customer customer = getCustomerById(updateCustomerRequest.getUserId());
@@ -412,20 +395,6 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setAppUser(authenticatedAppUser);
         customerRepository.save(customer);
         return "Customer password updated successfully";
-    }
-
-    private BigDecimal calculateBalance(Long customerId){
-        Customer customer = getCustomerById(customerId);
-        BigDecimal balance = BigDecimal.ZERO;
-        List<Transaction> transactions = customer.getAccount().getTransactions();
-        for(Transaction transaction : transactions){
-            if(transaction.getTransactionType() == TransactionType.DEPOSIT)
-                balance = balance.add(transaction.getAmount());
-            if(transaction.getTransactionType() == TransactionType.WITHDRAW ||
-                    transaction.getTransactionType() == TransactionType.TRANSFER)
-                balance = balance.subtract(transaction.getAmount());
-        }
-        return balance;
     }
 
     @Override

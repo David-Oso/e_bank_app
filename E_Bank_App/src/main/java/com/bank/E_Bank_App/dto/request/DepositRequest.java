@@ -20,6 +20,6 @@ public class DepositRequest {
     private Long customerId;
 
     @NotNull(message = "field amount cannot be null")
-    @DecimalMin(value = "0.01", inclusive = true, message = "Amount must be greater than or equal to 0.01")
+    @DecimalMin(value = "0.01", message = "Amount must be greater than or equal to 0.01")
     private BigDecimal amount;
 }
