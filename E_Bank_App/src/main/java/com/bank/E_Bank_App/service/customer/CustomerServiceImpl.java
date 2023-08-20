@@ -12,6 +12,7 @@ import com.bank.E_Bank_App.exception.E_BankException;
 import com.bank.E_Bank_App.exception.InvalidDetailsException;
 import com.bank.E_Bank_App.exception.NotFoundException;
 import com.bank.E_Bank_App.otp.OtpEntity;
+import com.bank.E_Bank_App.service.appUser.AppUserService;
 import com.bank.E_Bank_App.service.mail.MailService;
 import com.bank.E_Bank_App.otp.OtpService;
 import com.bank.E_Bank_App.service.cloud.CloudService;
@@ -47,7 +48,8 @@ public class CustomerServiceImpl implements CustomerService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EBankTokenService eBankTokenService;
-    private final AuthenticationManager authenticationManager;
+//    private final AuthenticationManager authenticationManager;
+    private final AppUserService appUserService;
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
         checkIfEmailAlreadyExists(registerRequest.getEmail());
@@ -55,7 +57,6 @@ public class CustomerServiceImpl implements CustomerService {
         AppUser appUser = getNewAppUser(registerRequest);
         Customer savedCustomer = getNewCustomer(registerRequest, customer, appUser);
         String otp = otpService.generateAndSaveOtp(savedCustomer);
-//        log.info("\n\n:::::::::::::::::::: GENERATED OTP -> %s ::::::::::::::::::::\n".formatted(otp));
         sendVerificationMail(savedCustomer, otp);
         return RegisterResponse.builder()
                 .message("Check your mail for otp to activate your account")
@@ -171,18 +172,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
-        Customer customer = authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
-        JwtResponse jwtResponse = getJwtTokenResponse(customer.getAppUser());
+        AppUser appUser = appUserService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+        JwtResponse jwtResponse = getJwtTokenResponse(appUser);
         return LoginResponse.builder()
                 .jwtResponse(jwtResponse)
                 .build();
-    }
-
-    private Customer authenticateUser(String email, String password) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password));
-        String userEmail = authentication.getPrincipal().toString();
-        return getCustomerByEmail(userEmail);
     }
 
     @Override
@@ -412,12 +406,11 @@ public class CustomerServiceImpl implements CustomerService {
     public String changePassword(ChangePasswordRequest changePasswordRequest) {
         Customer customer = getCustomerById(changePasswordRequest.getUserId());
         AppUser appUser = customer.getAppUser();
-        Customer authenticatedCustomer =
-                authenticateUser(appUser.getEmail(), changePasswordRequest.getPassword());
+        AppUser authenticatedAppUser = appUserService.authenticate(appUser.getEmail(), changePasswordRequest.getPassword());
         String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
-        authenticatedCustomer.getAppUser()
-                .setPassword(encodedPassword);
-        customerRepository.save(authenticatedCustomer);
+        authenticatedAppUser.setPassword(encodedPassword);
+        customer.setAppUser(authenticatedAppUser);
+        customerRepository.save(customer);
         return "Customer password updated successfully";
     }
 

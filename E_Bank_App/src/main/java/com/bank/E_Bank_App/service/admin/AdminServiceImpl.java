@@ -7,6 +7,7 @@ import com.bank.E_Bank_App.data.model.Role;
 import com.bank.E_Bank_App.data.repository.AdminRepository;
 import com.bank.E_Bank_App.dto.request.AdminLoginRequest;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
+import com.bank.E_Bank_App.service.appUser.AppUserService;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,8 +19,9 @@ public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final AdminConfig adminConfig;
     private final PasswordEncoder passwordEncoder;
+    private final AppUserService appUserService;
 
-//    @PostConstruct
+    @PostConstruct
     public void registerAdmin(){
         final String encodedPassword = passwordEncoder.encode(adminConfig.getAdminPassword());
     AppUser appUser = AppUser.builder()
@@ -43,6 +45,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public LoginResponse authenticate(AdminLoginRequest request) {
+        AppUser authenticatedAppUser = appUserService.authenticate(request.getEmail(), request.getPassword());
         return null;
     }
 }

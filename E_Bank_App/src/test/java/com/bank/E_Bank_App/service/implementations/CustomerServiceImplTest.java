@@ -129,15 +129,15 @@ class CustomerServiceImplTest {
 
     @Test
     void verifyEmailTest(){
-        OtpVerificationResponse response1 = customerService.verifyEmail("539256");
+        OtpVerificationResponse response1 = customerService.verifyEmail("905551");
         assertThat(response1.getEmail()).isEqualTo(registerRequest1.getEmail());
 
-        OtpVerificationResponse response2 = customerService.verifyEmail("732822");
+        OtpVerificationResponse response2 = customerService.verifyEmail("272148");
         assertThat(response2.getEmail()).isEqualTo(registerRequest2.getEmail());
     }
 
     @Test
-    void authenticateUserTest() {
+    void loginTest() {
         LoginResponse response = customerService.login(loginRequest);
         assertThat(response.getJwtResponse()).isNotNull();
     }
