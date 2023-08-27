@@ -23,7 +23,6 @@ public class AdminServiceImpl implements AdminService {
     private final AdminConfig adminConfig;
     private final PasswordEncoder passwordEncoder;
     private final AppUserService appUserService;
-    h
 
 //    @PostConstruct
     public void registerAdmin(){
