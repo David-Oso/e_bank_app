@@ -3,11 +3,10 @@ package com.bank.E_Bank_App.service.customer;
 import com.bank.E_Bank_App.data.model.*;
 import com.bank.E_Bank_App.data.repository.CustomerRepository;
 import com.bank.E_Bank_App.dto.request.*;
-import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
+import com.bank.E_Bank_App.dto.request.mailRequest.Recipient;
+import com.bank.E_Bank_App.dto.request.mailRequest.SendEmailRequest;
 import com.bank.E_Bank_App.dto.response.*;
-import com.bank.E_Bank_App.exception.E_BankException;
-import com.bank.E_Bank_App.exception.InvalidDetailsException;
-import com.bank.E_Bank_App.exception.NotFoundException;
+import com.bank.E_Bank_App.exception.*;
 import com.bank.E_Bank_App.otp.OtpEntity;
 import com.bank.E_Bank_App.otp.OtpService;
 import com.bank.E_Bank_App.service.appUser.AppUserService;
@@ -38,8 +37,11 @@ public class CustomerServiceImpl implements CustomerService {
     private final OtpService otpService;
     private final ModelMapper modelMapper;
     private final CloudService cloudService;
-    private EmailRequest emailRequest;
+    private SendEmailRequest emailRequest;
+
     private final PasswordEncoder passwordEncoder;
+//    @Qualifier("customerPasswordEncoder")
+//    private finalPasswordEncoder passwordEncoder;
     private final AppUserService appUserService;
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
@@ -98,7 +100,7 @@ public class CustomerServiceImpl implements CustomerService {
         String htmlContent = String.format(mailTemplate, firstName, otp);
         String subject = "Email Verification";
         String email = customer.getAppUser().getEmail();
-        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        emailRequest = buildEmailRequest(firstName, email, subject, htmlContent);
         mailService.sendHtmlMail(emailRequest);
 
     }
@@ -171,12 +173,13 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public SetUpAccountResponse setUpAccount(SetUpAccountRequest setUpAccountRequest) {
         Customer customer = getCustomerById(setUpAccountRequest.getCustomerId());
+        checkIfCustomerAlreadyHasAccountNumber(customer);
         String firstName = customer.getAppUser().getFirstName();
         String lastName = customer.getAppUser().getLastName();
-        Account account = customer.getAccount();
         String accountName = "%s %s"
                 .formatted(firstName, lastName);
         String accountNumber = generateAccountNumber();
+        Account account = customer.getAccount();
         account.setAccountName(accountName);
         account.setAccountNumber(accountNumber);
         account.setPin(setUpAccountRequest.getPin());
@@ -188,7 +191,10 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
     }
 
-
+    private void checkIfCustomerAlreadyHasAccountNumber(Customer customer){
+        if(customer.getAccount().getAccountNumber() != null)
+            throw new AlreadyExistException("Customer already has an account");
+    }
     private String generateAccountNumber() {
         SecureRandom randomNumbers = new SecureRandom();
         return randomNumbers.ints(10, 0, 10)
@@ -225,7 +231,7 @@ public class CustomerServiceImpl implements CustomerService {
         String subject = "Credit Alert Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        emailRequest = buildEmailRequest(firstName, email, subject, htmlContent);
         mailService.sendHtmlMail(emailRequest);
     }
 
@@ -262,7 +268,7 @@ public class CustomerServiceImpl implements CustomerService {
         String subject = "Debit Alert Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        emailRequest = buildEmailRequest(firstName, email, subject, htmlContent);
         mailService.sendHtmlMail(emailRequest);
     }
 
@@ -319,7 +325,7 @@ public class CustomerServiceImpl implements CustomerService {
         String subject = "Transfer Transaction Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, recipientAccountNumber, description,
                 transactionType, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
-        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        emailRequest = buildEmailRequest(firstName, email, subject, htmlContent);
         mailService.sendHtmlMail(emailRequest);
     }
 
@@ -373,6 +379,22 @@ public class CustomerServiceImpl implements CustomerService {
         return getUpdateCustomerResponse(savedCustomer);
     }
 
+    private void validateFirstName(Long customerId, String firstName){
+        Customer customer = getCustomerById(customerId);
+        AppUser appUser = customer.getAppUser();
+        if(appUser.getFirstName().equals(firstName))
+            throw new InvalidUpdateException("Customer already has this first name");
+    }
+
+private void validateLastName(Long userId, String lastName){
+
+    }
+
+private void validateGender(Long userId, Gender gender){
+    }
+private void dateOfBirth(Long userId, String dateOfBirth){
+    }
+
     private static UpdateCustomerResponse getUpdateCustomerResponse(Customer savedCustomer) {
         return UpdateCustomerResponse.builder()
                 .id(savedCustomer.getId())
@@ -406,7 +428,7 @@ public class CustomerServiceImpl implements CustomerService {
         String htmlContent = String.format(mailTemplate, firstName, otp, E_BankUtils.BANK_PHONE_NUMBER);
         String subject = "Reset Password";
         String email = customer.getAppUser().getEmail();
-        emailRequest = buildEmailRequest(email, subject, htmlContent);
+        emailRequest = buildEmailRequest(firstName, email, subject, htmlContent);
         mailService.sendHtmlMail(emailRequest);
         return "Check your email to reset your password";
     }
@@ -469,11 +491,12 @@ public class CustomerServiceImpl implements CustomerService {
         return "Transactions deleted successfully";
     }
 
-    private EmailRequest buildEmailRequest(String email, String subject, String htmlContent){
-        emailRequest = new EmailRequest();
-        emailRequest.setRecipientEmail(email);
+    private SendEmailRequest buildEmailRequest(String name, String email, String subject, String htmlContent){
+        SendEmailRequest emailRequest = new SendEmailRequest();
+        Recipient recipient = new Recipient(name, email);
+        emailRequest.getRecipients().add(recipient);
         emailRequest.setSubject(subject);
-        emailRequest.setHtmlContent(htmlContent);
+        emailRequest.setContent(htmlContent);
         return emailRequest;
     }
 }

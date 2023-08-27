@@ -48,8 +48,4 @@ public class SecurityConfiguration {
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
 }

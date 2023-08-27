@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
-@Setter
+//@Setter
 public class Sender {
     private String name;
     private String email;

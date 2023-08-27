@@ -1,7 +1,9 @@
 package com.bank.E_Bank_App.config.appConfig;
 
 import com.bank.E_Bank_App.config.adminConfig.AdminConfig;
+import com.bank.E_Bank_App.config.mailConfig.MailConfig;
 import com.bank.E_Bank_App.dto.request.mailRequest.EmailRequest;
+import com.bank.E_Bank_App.dto.request.mailRequest.SendEmailRequest;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.modelmapper.ModelMapper;
@@ -35,6 +37,10 @@ public class AppConfig {
     @Value("${adminPassword}")
     private String adminPassword;
 
+    @Value("${mail.api.key}")
+    private String mailApiKey;
+
+
     @Bean
     public AdminConfig adminConfig(){
         return new AdminConfig(adminId, adminFirstName, adminLastName, adminPhoneNumber, adminEmail, adminPassword);
@@ -55,7 +61,15 @@ public class AppConfig {
         );
     }
     @Bean
-    public EmailRequest emailNotificationRequest(){
-        return new EmailRequest();
+//    public EmailRequest emailNotificationRequest(){
+//        return new EmailRequest();
+//    }
+    public SendEmailRequest sendEmailRequest(){
+        return new SendEmailRequest();
+    }
+
+    @Bean
+    public MailConfig mailConfig(){
+        return new MailConfig(mailApiKey);
     }
 }

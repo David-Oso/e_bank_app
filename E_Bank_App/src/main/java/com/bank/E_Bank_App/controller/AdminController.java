@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @AllArgsConstructor
-@RequestMapping("/api/v1/admin/")
+@RequestMapping("/admin/")
 @RestController
 public class AdminController {
     private final AdminService adminService;
-
-    @PostMapping("login")
+    @PostMapping(value = "v1/login", produces = "application/json")
     public ResponseEntity<?> adminLogin(@Valid @RequestBody AdminLoginRequest adminLoginRequest){
         LoginResponse adminLoginResponse = adminService.authenticate(adminLoginRequest);
         return ResponseEntity.status(HttpStatus.OK).body(adminLoginResponse);
