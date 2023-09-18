@@ -17,4 +17,5 @@ public class Admin {
     private AppUser appUser;
     @Column(unique = true)
     private String identity;
+    private String  mend;
 }
