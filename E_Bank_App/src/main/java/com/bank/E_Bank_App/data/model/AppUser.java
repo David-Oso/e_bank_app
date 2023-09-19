@@ -24,4 +24,5 @@ public class AppUser {
     private Role role;
     private boolean isEnable = false;
     private boolean isLocked = false;
+    private String lockee;
 }
