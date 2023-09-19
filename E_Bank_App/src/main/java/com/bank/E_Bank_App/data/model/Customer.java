@@ -26,4 +26,5 @@ public class Customer {
     private String imageUrl;
     private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
+    private String custom;
 }
