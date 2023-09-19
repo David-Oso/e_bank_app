@@ -22,4 +22,5 @@ public class Bank {
     private final String location = BANK_LOCATION;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Customer> customers;
+    private String banke;
 }
