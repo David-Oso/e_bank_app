@@ -23,4 +23,5 @@ public class Account {
     private String pin;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Transaction> transactions;
+    private String mende;
 }
