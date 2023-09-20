@@ -111,9 +111,9 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.OK).body(deleteAllTransactionResponse);
     }
 
-    @GetMapping
-    public String getThem(){
-        return "get them";
+    @PostMapping
+    public String postIt(){
+        return "post it";
     }
 }
 
