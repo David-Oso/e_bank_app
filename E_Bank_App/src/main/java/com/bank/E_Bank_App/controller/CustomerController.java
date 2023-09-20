@@ -110,10 +110,5 @@ public class CustomerController {
                 .deleteAllTransactionsByCustomerId(customer_id);
         return ResponseEntity.status(HttpStatus.OK).body(deleteAllTransactionResponse);
     }
-
-    @PostMapping
-    public String postIt(){
-        return "post it";
-    }
 }
 
