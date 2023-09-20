@@ -110,5 +110,10 @@ public class CustomerController {
                 .deleteAllTransactionsByCustomerId(customer_id);
         return ResponseEntity.status(HttpStatus.OK).body(deleteAllTransactionResponse);
     }
+
+    @DeleteMapping
+    public String booth(){
+        return "boothe";
+    }
 }
 
