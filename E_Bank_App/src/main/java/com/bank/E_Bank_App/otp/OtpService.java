@@ -7,5 +7,4 @@ public interface OtpService {
 //    String generateAndSaveToken(Customer customer);
     OtpEntity validateReceivedOtp(String token);
     void deleteToken(OtpEntity otpEntity);
-    String fakeToken();
 }
