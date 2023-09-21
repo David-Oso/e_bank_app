@@ -26,10 +26,10 @@ public class OtpServiceImpl implements OtpService {
         return generatedOtp;
     }
 
-    @Override
-    public String generateAndSaveToken(Customer customer) {
-        return null;
-    }
+//    @Override
+//    public String generateAndSaveToken(Customer customer) {
+//        return null;
+//    }
 
     @Override
     public OtpEntity validateReceivedOtp(String otp) {
