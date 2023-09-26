@@ -242,7 +242,7 @@ public class CustomerServiceImpl implements CustomerService {
         String pin = account.getPin();
         validatePin(pin, withDrawRequest.getPin());
         BigDecimal balance = calculateBalance(withDrawRequest.getCustomerId());
-        checkWhetherBalanceIsSufficient(balance, withDrawRequest.getAmount());
+        checkIfBalanceIsSufficient(balance, withDrawRequest.getAmount());
         Transaction transaction = setTransaction(withDrawRequest.getAmount(), TransactionType.WITHDRAW);
         account.getTransactions().add(transaction);
         Customer savedCustomer = customerRepository.save(customer);
@@ -278,7 +278,7 @@ public class CustomerServiceImpl implements CustomerService {
         else if(!pin.equals(requestPin))
             throw new InvalidDetailsException("Incorrect pin");
     }
-    private static void checkWhetherBalanceIsSufficient(BigDecimal balance, BigDecimal requestAmount){
+    private static void checkIfBalanceIsSufficient(BigDecimal balance, BigDecimal requestAmount){
         if(requestAmount.compareTo(balance) > 0)
             throw new E_BankException("Insufficient balance");
     }
@@ -290,7 +290,7 @@ public class CustomerServiceImpl implements CustomerService {
         String pin = account.getPin();
         validatePin(pin, transferRequest.getPin());
         BigDecimal balance = calculateBalance(transferRequest.getCustomerId());
-        checkWhetherBalanceIsSufficient(balance, transferRequest.getAmount());
+        checkIfBalanceIsSufficient(balance, transferRequest.getAmount());
         Customer recipient = getCustomerByAccountNumber(transferRequest.getRecipientAccountNumber());
         Account recipientAccount = recipient.getAccount();
 
