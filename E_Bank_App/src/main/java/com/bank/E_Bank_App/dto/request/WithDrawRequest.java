@@ -21,7 +21,6 @@ public class WithDrawRequest {
     @NotNull(message = "field amount cannot be null")
     @DecimalMin(value = "200.00", message = "minimum withdraw amount is 200.00")
     @DecimalMax(value = "10000.00", message = "maximum withdraw amount is 10000.00")
-//    @Pattern(regexp= E_BankUtils.AMOUNT_REGEX, message = "enter digit")
     private BigDecimal amount;
 
     @NotNull(message = "field pin cannot be null")
