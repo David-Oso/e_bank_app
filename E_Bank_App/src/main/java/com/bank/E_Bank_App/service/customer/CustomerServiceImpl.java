@@ -465,7 +465,6 @@ private void dateOfBirth(Long userId, String dateOfBirth){
             if (transaction.getId().equals(transactionId))
                 return transaction;
         }
-
         throw new E_BankException("Transaction not found");
     }
 
