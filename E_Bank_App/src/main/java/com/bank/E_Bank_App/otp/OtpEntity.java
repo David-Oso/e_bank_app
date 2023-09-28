@@ -22,4 +22,5 @@ public class OtpEntity {
     private String token;
     private final LocalDateTime createdAt = LocalDateTime.now();
     private final LocalDateTime expirationTime = createdAt.plusMinutes(10L);
+    private String thurs;
 }
