@@ -1,5 +1,6 @@
 package com.bank.E_Bank_App.service.customer;
 
+import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
 import com.bank.E_Bank_App.dto.request.LoginRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
@@ -68,12 +69,16 @@ class CustomerServiceImplTest {
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("pehey92995@mugadget.com");
         loginRequest.setPassword("Password");
+
         LoginResponse loginResponse = customerService.login(loginRequest);
         assertThat(loginResponse.getJwtResponse()).isNotNull();
     }
 
     @Test
     void getCustomerById() {
+        Customer customer = customerService.getCustomerById(3L);
+        String email = customer.getAppUser().getEmail();
+        assertThat(email).isEqualTo(registerRequest1.getEmail());
     }
 
     @Test
