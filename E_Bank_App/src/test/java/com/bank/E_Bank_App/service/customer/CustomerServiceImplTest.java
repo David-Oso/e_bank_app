@@ -2,6 +2,7 @@ package com.bank.E_Bank_App.service.customer;
 
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
+import com.bank.E_Bank_App.dto.request.DepositRequest;
 import com.bank.E_Bank_App.dto.request.LoginRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
 import com.bank.E_Bank_App.dto.request.SetUpAccountRequest;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -108,6 +111,9 @@ class CustomerServiceImplTest {
 
     @Test
     void getCustomerByAccountNumber() {
+        Customer customer = customerService.getCustomerByAccountNumber("3199499391");
+        String email = customer.getAppUser().getEmail();
+        assertThat(email).isEqualTo(registerRequest2.getEmail());
     }
 
     @Test
