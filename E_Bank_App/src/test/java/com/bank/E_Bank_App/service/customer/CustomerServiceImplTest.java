@@ -183,4 +183,10 @@ class CustomerServiceImplTest {
         String response = customerService.changePassword(request);
         assertThat(response).isEqualTo("Customer password updated successfully");
     }
+
+    @Test
+    void sendResetPasswordMailTest(){
+        String response = customerService.sendResetPasswordMail(registerRequest2.getEmail());
+        assertThat(response).isEqualTo("Check your email to reset your password");
+    }
 }
