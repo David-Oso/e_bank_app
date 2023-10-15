@@ -3,10 +3,7 @@ package com.bank.E_Bank_App.service.customer;
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
 import com.bank.E_Bank_App.dto.request.*;
-import com.bank.E_Bank_App.dto.response.LoginResponse;
-import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
-import com.bank.E_Bank_App.dto.response.RegisterResponse;
-import com.bank.E_Bank_App.dto.response.SetUpAccountResponse;
+import com.bank.E_Bank_App.dto.response.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,5 +153,15 @@ class CustomerServiceImplTest {
         String recipientPin = recipient.getAccount().getPin();
         BigDecimal recipientBalance = customerService.getBalance(recipient.getId(), recipientPin);
         assertThat(recipientBalance).isEqualTo(BigDecimal.valueOf(2000).setScale(2));
+    }
+
+    @Test
+    void getBalanceTest(){
+        BigDecimal balance = customerService.getBalance(3L, "2345");
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(6000).setScale(2));
+    }
+
+    @Test
+    void  updateCustomerTest(){
     }
 }

@@ -19,8 +19,7 @@ public class E_BankUtils {
     public static final String BANK_NAME = "E_Bank Nigeria";
     public static final String BANK_LOCATION = "No 1, Olowo road, Sabo Lagos, Nigeria.";
     public static final String BANK_EMAIL = "noreply@ebank.net";
-    public static final String BANK_PHONE_NUMBER = "+2349030400837";
-    public static final String USER_VERIFICATION_BASE_URL = "localhost:8000/api/v1/customer/verify";
+    public static final String BANK_PHONE_NUMBER = "+2341230400837";
 
     private static final String EMAIL_VERIFICATION_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\emailVerification.txt";
     private static final String RESET_PASSWORD_TEMPLATE_LOCATION = "C:\\Users\\User\\IdeaProjects\\E_Bank_App\\E_Bank_App\\src\\main\\resources\\templates\\ResetPasswordMail.html";
