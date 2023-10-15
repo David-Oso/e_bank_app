@@ -4,9 +4,11 @@ import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
 import com.bank.E_Bank_App.dto.request.LoginRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
+import com.bank.E_Bank_App.dto.request.SetUpAccountRequest;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
+import com.bank.E_Bank_App.dto.response.SetUpAccountResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,11 +93,21 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void getCustomerByAccountNumber() {
+    void setUpAccount() {
+        SetUpAccountRequest accountRequest = new SetUpAccountRequest();
+        accountRequest.setCustomerId(3L);
+        accountRequest.setPin("2345");
+//        3199499391
+//        4377816961
+
+        SetUpAccountResponse response = customerService.setUpAccount(accountRequest);
+        assertThat(response.getMessage()).isEqualTo("Account set up successful");
+        assertThat(response.getAccountNumber()).isNotNull();
+        assertThat(response.getAccountName()).isNotNull();
     }
 
     @Test
-    void setUpAccount() {
+    void getCustomerByAccountNumber() {
     }
 
     @Test
