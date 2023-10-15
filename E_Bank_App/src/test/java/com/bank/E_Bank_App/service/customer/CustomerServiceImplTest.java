@@ -2,10 +2,7 @@ package com.bank.E_Bank_App.service.customer;
 
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
-import com.bank.E_Bank_App.dto.request.DepositRequest;
-import com.bank.E_Bank_App.dto.request.LoginRequest;
-import com.bank.E_Bank_App.dto.request.RegisterRequest;
-import com.bank.E_Bank_App.dto.request.SetUpAccountRequest;
+import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
@@ -118,6 +115,13 @@ class CustomerServiceImplTest {
 
     @Test
     void makeDeposit() {
+        DepositRequest depositRequest = new DepositRequest();
+        depositRequest.setCustomerId(3L);
+        depositRequest.setAmount(BigDecimal.valueOf(10000.00));
+        depositRequest.setDescription("Making deposit to my account");
+
+        String response = customerService.makeDeposit(depositRequest);
+        assertThat(response).isEqualTo("Transaction Successful");
     }
 
     @Test
