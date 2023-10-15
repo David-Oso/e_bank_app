@@ -83,6 +83,11 @@ class CustomerServiceImplTest {
 
     @Test
     void getCustomerByEmail() {
+        Customer customer = customerService.getCustomerByEmail("pehey92995@mugadget.com");
+        String firstName = customer.getAppUser().getFirstName();
+        String lastName = customer.getAppUser().getLastName();
+        assertThat(firstName).isEqualTo(registerRequest1.getFirstName());
+        assertThat(lastName).isEqualTo(registerRequest1.getLastName());
     }
 
     @Test
