@@ -35,9 +35,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(customerLoginResponse);
     }
 
-    @PostMapping(value = "v1/resend_verification_mail/{customer_id}", produces = "application/json")
-    public ResponseEntity<?> resendVerificationMail(@Valid @PathVariable Long customer_id){
-        String mailResponse = customerService.resendVerificationMail(customer_id);
+    @PostMapping(value = "v1/resend_verification_mail", produces = "application/json")
+    public ResponseEntity<?> resendVerificationMail(@Valid @RequestParam String email){
+        String mailResponse = customerService.resendVerificationMail(email);
         return ResponseEntity.ok(mailResponse);
     }
 }

@@ -71,9 +71,9 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.OK).body(updateCustomerResponse);
     }
 
-    @GetMapping(value = "v1/send_reset_password_mail/{customer_id}", produces = "application/json")
-    public ResponseEntity<?> sendResetPasswordMail(@Valid @PathVariable Long customer_id){
-        String resetPasswordMailResponse = customerService.sendResetPasswordMail(customer_id);
+    @GetMapping(value = "v1/send_reset_password_mail", produces = "application/json")
+    public ResponseEntity<?> sendResetPasswordMail(@Valid @RequestParam String email){
+        String resetPasswordMailResponse = customerService.sendResetPasswordMail(email);
         return ResponseEntity.ok(resetPasswordMailResponse);
     }
     @PostMapping(value = "v1/reset/password", produces = "application/json")
