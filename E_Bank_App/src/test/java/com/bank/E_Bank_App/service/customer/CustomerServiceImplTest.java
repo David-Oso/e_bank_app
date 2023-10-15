@@ -8,7 +8,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +42,16 @@ class CustomerServiceImplTest {
         registerRequest2.setPhoneNumber("+2345098767867");
         registerRequest2.setGender(Gender.FEMALE);
         registerRequest2.setDateOfBirth("10/08/2003");
+    }
+    private MultipartFile uploadTestImageFile(String imageUrl){
+        MultipartFile file = null;
+        try{
+            file =  new MockMultipartFile("test_upload_image",
+                    new FileInputStream(imageUrl));
+        }catch (IOException exception){
+            System.out.println(exception.getMessage());
+        }
+        return file;
     }
 
     @Test
@@ -188,5 +202,21 @@ class CustomerServiceImplTest {
     void sendResetPasswordMailTest(){
         String response = customerService.sendResetPasswordMail(registerRequest2.getEmail());
         assertThat(response).isEqualTo("Check your email to reset your password");
+    }
+
+//    636448
+    @Test
+    void resetPasswordTest(){
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setOtp("636448");
+        request.setNewPassword("Password1.");
+        request.setConfirmPassword("Password1.");
+
+        String response = customerService.resetPassword(request);
+        assertThat(response).isEqualTo("Password reset successful");
+    }
+
+    @Test
+    void uploadImageTest(){
     }
 }
