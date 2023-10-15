@@ -140,5 +140,21 @@ class CustomerServiceImplTest {
 
     @Test
     void makeTransferTest(){
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setAmount(BigDecimal.valueOf(2000.00));
+        transferRequest.setCustomerId(3L);
+        transferRequest.setPin("2345");
+        transferRequest.setRecipientAccountNumber("3199499391");
+        transferRequest.setDescription("Making Transfer");
+
+        String response  = customerService.makeTransfer(transferRequest);
+        assertThat(response).isEqualTo("Transaction Successful");
+        BigDecimal balance = customerService.getBalance(transferRequest.getCustomerId(), transferRequest.getPin());
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(6000).setScale(2));
+
+        Customer recipient = customerService.getCustomerByAccountNumber(transferRequest.getRecipientAccountNumber());
+        String recipientPin = recipient.getAccount().getPin();
+        BigDecimal recipientBalance = customerService.getBalance(recipient.getId(), recipientPin);
+        assertThat(recipientBalance).isEqualTo(BigDecimal.valueOf(2000).setScale(2));
     }
 }
