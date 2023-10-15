@@ -1,7 +1,9 @@
 package com.bank.E_Bank_App.service.customer;
 
 import com.bank.E_Bank_App.data.model.Gender;
+import com.bank.E_Bank_App.dto.request.LoginRequest;
 import com.bank.E_Bank_App.dto.request.RegisterRequest;
+import com.bank.E_Bank_App.dto.response.LoginResponse;
 import com.bank.E_Bank_App.dto.response.OtpVerificationResponse;
 import com.bank.E_Bank_App.dto.response.RegisterResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +54,7 @@ class CustomerServiceImplTest {
     @Test
     void verifyEmail() {
         OtpVerificationResponse response1 = customerService.verifyEmail("172262");
-        assertThat(response1.getEmail()).isEqualTo(registerRequest2.getEmail());
+        assertThat(response1.getEmail()).isEqualTo(registerRequest1.getEmail());
     }
 
     @Test
@@ -63,6 +65,11 @@ class CustomerServiceImplTest {
 
     @Test
     void login() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("pehey92995@mugadget.com");
+        loginRequest.setPassword("Password");
+        LoginResponse loginResponse = customerService.login(loginRequest);
+        assertThat(loginResponse.getJwtResponse()).isNotNull();
     }
 
     @Test
