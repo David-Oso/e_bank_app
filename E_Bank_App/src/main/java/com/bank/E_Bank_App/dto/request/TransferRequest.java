@@ -34,4 +34,6 @@ public class TransferRequest {
     @NotEmpty(message = "field pin cannot be empty")
     @Pattern(regexp = E_BankUtils.PIN_REGEX)
     private String pin;
+
+    private String description;
 }

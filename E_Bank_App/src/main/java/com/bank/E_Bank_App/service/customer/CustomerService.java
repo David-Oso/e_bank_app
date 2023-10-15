@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CustomerService {
     RegisterResponse register(RegisterRequest registerRequest);
-    String resendVerificationMail(Long customerId);
+    String resendVerificationMail(String email);
     OtpVerificationResponse verifyEmail(String otp);
     LoginResponse login(LoginRequest loginRequest);
     Customer getCustomerById(Long customerId);
@@ -23,7 +23,7 @@ public interface CustomerService {
     BigDecimal getBalance(Long customerId, String pin);
     UpdateCustomerResponse updateCustomer(UpdateCustomerRequest updateCustomerRequest);
     String changePassword(ChangePasswordRequest changePasswordRequest);
-    String sendResetPasswordMail(Long customerId);
+    String sendResetPasswordMail(String email);
     String resetPassword(ResetPasswordRequest resetPasswordRequest);
     String uploadImage(UploadImageRequest uploadImageRequest);
     Transaction getTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId);

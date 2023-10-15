@@ -27,4 +27,6 @@ public class WithDrawRequest {
     @NotEmpty(message = "field pin cannot be empty")
     @NotBlank(message = "field pin cannot be blank")
     private String pin;
+
+    private String description;
 }

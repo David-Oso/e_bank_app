@@ -62,9 +62,10 @@ public class CustomerServiceImpl implements CustomerService {
         if(isPresent){
             Customer customer = customerRepository.findByAppUser_Email(email).get();
             AppUser appUser = customer.getAppUser();
-            if(!appUser.isEnable()) resendVerificationMail(customer.getId());
+            if(!appUser.isEnable()) resendVerificationMail(email);
             else if (appUser.isLocked())
                 throw new E_BankException("Account has been blocked");
+            else throw new AlreadyExistException("Account already exists");
         }
     }
 
@@ -135,13 +136,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public String resendVerificationMail(Long customerId) {
-        Customer customer = getCustomerById(customerId);
+    public String resendVerificationMail(String email) {
+        Customer customer = getCustomerByEmail(email);
         String otp = otpService.generateAndSaveOtp(customer);
         sendVerificationMail(customer, otp);
         return "Another otp has sent to your mail proceed by checking your email";
     }
-
 
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
@@ -206,7 +206,7 @@ public class CustomerServiceImpl implements CustomerService {
     public String makeDeposit(DepositRequest depositRequest) {
         Customer customer = getCustomerById(depositRequest.getCustomerId());
         Account account = customer.getAccount();
-        Transaction transaction = setTransaction(depositRequest.getAmount(), TransactionType.DEPOSIT);
+        Transaction transaction = setTransaction(depositRequest.getAmount(), depositRequest.getDescription(), TransactionType.CREDIT);
         account.getTransactions().add(transaction);
         Customer savedCustomer = customerRepository.save(customer);
         sendDepositNotification(savedCustomer, depositRequest.getAmount());
@@ -227,7 +227,7 @@ public class CustomerServiceImpl implements CustomerService {
         String transactionDateAndTime = DateTimeFormatter.ofPattern("EEE, dd/MM/yy, hh:mm:ss a").format(LocalDateTime.now());
         String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
-        String myEmail = "osodavid001@gmail.com";
+        String myEmail = E_BankUtils.BANK_EMAIL;
         String subject = "Credit Alert Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
@@ -243,7 +243,7 @@ public class CustomerServiceImpl implements CustomerService {
         validatePin(pin, withDrawRequest.getPin());
         BigDecimal balance = calculateBalance(withDrawRequest.getCustomerId());
         checkIfBalanceIsSufficient(balance, withDrawRequest.getAmount());
-        Transaction transaction = setTransaction(withDrawRequest.getAmount(), TransactionType.WITHDRAW);
+        Transaction transaction = setTransaction(withDrawRequest.getAmount(), withDrawRequest.getDescription(), TransactionType.DEBIT);
         account.getTransactions().add(transaction);
         Customer savedCustomer = customerRepository.save(customer);
         sendWithdrawNotificationMail(savedCustomer, withDrawRequest.getAmount());
@@ -264,7 +264,7 @@ public class CustomerServiceImpl implements CustomerService {
         String transactionDateAndTime = DateTimeFormatter.ofPattern("EEE, dd/MM/yy, hh:mm:ss a").format(LocalDateTime.now());
         String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
-        String myEmail = "osodavid001@gmail.com";
+        String myEmail = E_BankUtils.BANK_EMAIL;
         String subject = "Debit Alert Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, transactionType,
                 description, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
@@ -294,11 +294,11 @@ public class CustomerServiceImpl implements CustomerService {
         Customer recipient = getCustomerByAccountNumber(transferRequest.getRecipientAccountNumber());
         Account recipientAccount = recipient.getAccount();
 
-        Transaction transaction = setTransaction(transferRequest.getAmount(), TransactionType.TRANSFER);
+        Transaction transaction = setTransaction(transferRequest.getAmount(), transferRequest.getDescription(), TransactionType.DEBIT);
         account.getTransactions().add(transaction);
         Customer savedCustomer = customerRepository.save(customer);
 
-        transaction.setTransactionType(TransactionType.DEPOSIT);
+        transaction.setTransactionType(TransactionType.CREDIT);
         recipientAccount.getTransactions().add(transaction);
         Customer savedRecipient = customerRepository.save(recipient);
         sendTransferNotificationMail(savedCustomer, transferRequest.getAmount(), recipientAccount.getAccountNumber());
@@ -321,7 +321,7 @@ public class CustomerServiceImpl implements CustomerService {
         String transactionDateAndTime = DateTimeFormatter.ofPattern("EEE, dd/MM/yy, hh:mm:ss a").format(LocalDateTime.now());
         String currentBalance = "₦%s".formatted(calculateBalance(customer.getId()));
         String myPhoneNumber = E_BankUtils.BANK_PHONE_NUMBER;
-        String myEmail = "osodavid001@gmail.com";
+        String myEmail = E_BankUtils.BANK_EMAIL;
         String subject = "Transfer Transaction Notification";
         String htmlContent = String.format(mailTemplate, firstName, accountName, accountNumber, recipientAccountNumber, description,
                 transactionType, transactionAmount, transactionDateAndTime, currentBalance, myPhoneNumber, myEmail);
@@ -329,9 +329,10 @@ public class CustomerServiceImpl implements CustomerService {
         mailService.sendHtmlMail(emailRequest);
     }
 
-    private static Transaction setTransaction(BigDecimal amount, TransactionType transactionType){
+    private static Transaction setTransaction(BigDecimal amount, String description, TransactionType transactionType){
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
+        transaction.setDescription(description);
         transaction.setTransactionType(transactionType);
         transaction.setTransactionTime(LocalDateTime.now());
         return transaction;
@@ -354,11 +355,12 @@ public class CustomerServiceImpl implements CustomerService {
         BigDecimal balance = BigDecimal.ZERO;
         List<Transaction> transactions = customer.getAccount().getTransactions();
         for(Transaction transaction : transactions){
-            if(transaction.getTransactionType() == TransactionType.DEPOSIT)
+            if(transaction.getTransactionType() == TransactionType.CREDIT)
                 balance = balance.add(transaction.getAmount());
-            if(transaction.getTransactionType() == TransactionType.WITHDRAW ||
-                    transaction.getTransactionType() == TransactionType.TRANSFER)
+            else if(transaction.getTransactionType() == TransactionType.DEBIT)
                 balance = balance.subtract(transaction.getAmount());
+//            if(transaction.getTransactionType() == TransactionType.WITHDRAW ||
+//                    transaction.getTransactionType() == TransactionType.TRANSFER)
         }
         return balance;
     }
@@ -420,15 +422,15 @@ private void dateOfBirth(Long userId, String dateOfBirth){
     }
 
     @Override
-    public String sendResetPasswordMail(Long customerId) {
-        Customer customer = getCustomerById(customerId);
+    public String sendResetPasswordMail(String email) {
+        Customer customer = getCustomerByEmail(email);
         String mailTemplate = E_BankUtils.GET_RESET_PASSWORD_MAIL_TEMPLATE;
         String firstName = customer.getAppUser().getFirstName();
         String otp = otpService.generateAndSaveOtp(customer);
         String htmlContent = String.format(mailTemplate, firstName, otp, E_BankUtils.BANK_PHONE_NUMBER);
         String subject = "Reset Password";
-        String email = customer.getAppUser().getEmail();
-        emailRequest = buildEmailRequest(firstName, email, subject, htmlContent);
+        String emailA = customer.getAppUser().getEmail();
+        emailRequest = buildEmailRequest(firstName, emailA, subject, htmlContent);
         mailService.sendHtmlMail(emailRequest);
         return "Check your email to reset your password";
     }
