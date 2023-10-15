@@ -126,5 +126,19 @@ class CustomerServiceImplTest {
 
     @Test
     void makeWithdraw() {
+        WithDrawRequest withDrawRequest = new WithDrawRequest();
+        withDrawRequest.setCustomerId(3L);
+        withDrawRequest.setPin("2345");
+        withDrawRequest.setAmount(BigDecimal.valueOf(2000.00));
+        withDrawRequest.setDescription("Making withdraw");
+
+        String response = customerService.makeWithdraw(withDrawRequest);
+        assertThat(response).isEqualTo("Transaction Successful");
+        BigDecimal balance = customerService.getBalance(withDrawRequest.getCustomerId(), withDrawRequest.getPin());
+        assertThat(balance).isEqualTo(BigDecimal.valueOf(8000).setScale(2));
+    }
+
+    @Test
+    void makeTransferTest(){
     }
 }
