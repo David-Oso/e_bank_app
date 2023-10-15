@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
@@ -44,6 +45,7 @@ public class CustomerServiceImpl implements CustomerService {
 //    private finalPasswordEncoder passwordEncoder;
     private final AppUserService appUserService;
     @Override
+    @Transactional
     public RegisterResponse register(RegisterRequest registerRequest) {
         checkIfEmailAlreadyExists(registerRequest.getEmail());
         Customer customer = new Customer();
@@ -106,6 +108,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     }
     @Override
+    @Transactional
     public OtpVerificationResponse verifyEmail(String otp) {
         OtpEntity otpEntity = otpService.validateReceivedOtp(otp);
         Customer customer = otpEntity.getCustomer();
@@ -203,6 +206,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public String makeDeposit(DepositRequest depositRequest) {
         Customer customer = getCustomerById(depositRequest.getCustomerId());
         Account account = customer.getAccount();
@@ -236,6 +240,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public String makeWithdraw(WithDrawRequest withDrawRequest) {
         Customer customer = getCustomerById(withDrawRequest.getCustomerId());
         Account account = customer.getAccount();
@@ -284,6 +289,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public String makeTransfer(TransferRequest transferRequest) {
         Customer customer = getCustomerById(transferRequest.getCustomerId());
         Account account = customer.getAccount();
@@ -381,22 +387,6 @@ public class CustomerServiceImpl implements CustomerService {
         return getUpdateCustomerResponse(savedCustomer);
     }
 
-    private void validateFirstName(Long customerId, String firstName){
-        Customer customer = getCustomerById(customerId);
-        AppUser appUser = customer.getAppUser();
-        if(appUser.getFirstName().equals(firstName))
-            throw new InvalidUpdateException("Customer already has this first name");
-    }
-
-private void validateLastName(Long userId, String lastName){
-
-    }
-
-private void validateGender(Long userId, Gender gender){
-    }
-private void dateOfBirth(Long userId, String dateOfBirth){
-    }
-
     private static UpdateCustomerResponse getUpdateCustomerResponse(Customer savedCustomer) {
         return UpdateCustomerResponse.builder()
                 .id(savedCustomer.getId())
@@ -410,6 +400,7 @@ private void dateOfBirth(Long userId, String dateOfBirth){
     }
 
     @Override
+    @Transactional
     public String changePassword(ChangePasswordRequest changePasswordRequest) {
         Customer customer = getCustomerById(changePasswordRequest.getUserId());
         AppUser appUser = customer.getAppUser();
@@ -436,6 +427,7 @@ private void dateOfBirth(Long userId, String dateOfBirth){
     }
 
     @Override
+    @Transactional
     public String resetPassword(ResetPasswordRequest resetPasswordRequest) {
         OtpEntity otpEntity = otpService.validateReceivedOtp(resetPasswordRequest.getOtp());
         Customer customer = otpEntity.getCustomer();
@@ -450,6 +442,7 @@ private void dateOfBirth(Long userId, String dateOfBirth){
     }
 
     @Override
+    @Transactional
     public String uploadImage(UploadImageRequest uploadImageRequest) {
         Customer customer= getCustomerById(uploadImageRequest.getCustomerId());
         String imageUrl = cloudService.upload(uploadImageRequest.getProfileImage());
@@ -463,11 +456,10 @@ private void dateOfBirth(Long userId, String dateOfBirth){
     public Transaction getTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId) {
         Customer customer = getCustomerById(customerId);
         List<Transaction> transactions = customer.getAccount().getTransactions();
-        for(Transaction transaction : transactions){
-            if (transaction.getId().equals(transactionId))
-                return transaction;
-        }
-        throw new E_BankException("Transaction not found");
+        return transactions.stream()
+                .filter(transact -> transact.getId().equals(transactionId))
+                .findFirst()
+                .orElseThrow(()->new E_BankException("Transaction not found"));
     }
 
     @Override
