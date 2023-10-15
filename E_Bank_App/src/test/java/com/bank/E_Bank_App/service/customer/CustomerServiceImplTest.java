@@ -163,5 +163,24 @@ class CustomerServiceImplTest {
 
     @Test
     void  updateCustomerTest(){
+        UpdateCustomerRequest request = new UpdateCustomerRequest();
+        request.setUserId(2L);
+        request.setFirstName("Yemi");
+        request.setLastName("Sola");
+
+        UpdateCustomerResponse response = customerService.updateCustomer(request);
+        assertThat(response.getFirstName()).isEqualTo("Yemi");
+        assertThat(response.getLastName()).isEqualTo("Sola");
+    }
+
+    @Test
+    void changePasswordTest(){
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setUserId(2L);
+        request.setPassword("Password");
+        request.setNewPassword("NewPassword");
+
+        String response = customerService.changePassword(request);
+        assertThat(response).isEqualTo("Customer password updated successfully");
     }
 }

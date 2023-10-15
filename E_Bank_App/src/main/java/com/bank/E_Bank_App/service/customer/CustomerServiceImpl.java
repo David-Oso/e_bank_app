@@ -372,6 +372,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public UpdateCustomerResponse updateCustomer(UpdateCustomerRequest updateCustomerRequest) {
         Customer customer = getCustomerById(updateCustomerRequest.getUserId());
         AppUser appUser = customer.getAppUser();
