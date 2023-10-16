@@ -39,11 +39,11 @@ public class CustomerServiceImpl implements CustomerService {
     private final ModelMapper modelMapper;
     private final CloudService cloudService;
     private SendEmailRequest emailRequest;
-
     private final PasswordEncoder passwordEncoder;
+    private final AppUserService appUserService;
+
 //    @Qualifier("customerPasswordEncoder")
 //    private finalPasswordEncoder passwordEncoder;
-    private final AppUserService appUserService;
     @Override
     @Transactional
     public RegisterResponse register(RegisterRequest registerRequest) {
@@ -470,19 +470,23 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public String deleteTransactionByCustomerIdAndTransactionId(Long customerId, Long transactionId) {
         Customer customer = getCustomerById(customerId);
         List<Transaction> transactions = customer.getAccount().getTransactions();
         transactions.removeIf(transaction ->
                 transaction.getId().equals(transactionId));
+        customerRepository.save(customer);
         return "Transaction deleted";
     }
 
     @Override
+    @Transactional
     public String deleteAllTransactionsByCustomerId(Long customerId) {
         Customer customer = getCustomerById(customerId);
         List<Transaction> transactions = customer.getAccount().getTransactions();
         transactions.clear();
+        customerRepository.save(customer);
         return "Transactions deleted successfully";
     }
 

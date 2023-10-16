@@ -2,6 +2,8 @@ package com.bank.E_Bank_App.service.customer;
 
 import com.bank.E_Bank_App.data.model.Customer;
 import com.bank.E_Bank_App.data.model.Gender;
+import com.bank.E_Bank_App.data.model.Transaction;
+import com.bank.E_Bank_App.data.model.TransactionType;
 import com.bank.E_Bank_App.dto.request.*;
 import com.bank.E_Bank_App.dto.response.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import static com.bank.E_Bank_App.utils.E_BankUtils.TEST_IMAGE_LOCATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -218,5 +221,13 @@ class CustomerServiceImplTest {
 
     @Test
     void uploadImageTest(){
+        UploadImageRequest imageRequest = new UploadImageRequest();
+        imageRequest.setCustomerId(2L);
+        imageRequest.setProfileImage(uploadTestImageFile(TEST_IMAGE_LOCATION));
+
+        String response = customerService.uploadImage(imageRequest);
+        assertThat(response).isEqualTo("Profile image uploaded");
     }
+
+
 }
