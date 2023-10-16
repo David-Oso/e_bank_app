@@ -12,8 +12,8 @@ import io.swagger.v3.oas.annotations.servers.Server;
 @OpenAPIDefinition(
         info = @Info(
                 contact = @Contact(
-                        name = "David",
-                        email = "osodavid001@gmail.com",
+                        name = "Temx",
+                        email = "pehey92995@mugadget.com",
                         url = ""
                 ),
                 description = "OpenApi documentation for e bank app",
@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
         servers = {
                 @Server(
                         description = "Local ENV",
-                        url = "http://localhost:8000"
+                        url = "http://localhost:8080"
                 ),
 //                @Server(
 //                        description = "PROD ENV",

@@ -263,5 +263,4 @@ class CustomerServiceImplTest {
         List<Transaction> transactions = customerService.getAllTransactionsByCustomerId(3L);
         assertThat(transactions.size()).isEqualTo(0);
     }
-
 }
