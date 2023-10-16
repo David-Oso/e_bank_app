@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 import static com.bank.E_Bank_App.utils.E_BankUtils.TEST_IMAGE_LOCATION;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -229,5 +230,19 @@ class CustomerServiceImplTest {
         assertThat(response).isEqualTo("Profile image uploaded");
     }
 
+    @Test
+    void getTransactionByCustomerIdAndTransactionIdTest(){
+        Transaction transaction = customerService.getTransactionByCustomerIdAndTransactionId(2L, 4L);
+        assertThat(transaction.getAmount()).isEqualTo(BigDecimal.valueOf(2000).setScale(2));
+        assertThat(transaction.getTransactionType()).isEqualTo(TransactionType.CREDIT);
+    }
 
+    @Test
+    void getAllTransactionsTest(){
+        List<Transaction> transactions = customerService.getAllTransactionsByCustomerId(2L);
+        assertThat(transactions.size()).isEqualTo(1);
+
+        List<Transaction> transactions1 = customerService.getAllTransactionsByCustomerId(3L);
+        assertThat(transactions1.size()).isEqualTo(3);
+    }
 }
