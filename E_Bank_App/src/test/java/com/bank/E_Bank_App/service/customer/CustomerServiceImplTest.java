@@ -245,4 +245,13 @@ class CustomerServiceImplTest {
         List<Transaction> transactions1 = customerService.getAllTransactionsByCustomerId(3L);
         assertThat(transactions1.size()).isEqualTo(3);
     }
+
+    @Test
+    void deleteTransactionByCustomerIdAndTransactionIdTest(){
+        String response = customerService.deleteTransactionByCustomerIdAndTransactionId(3L, 1L);
+        assertThat(response).isEqualTo("Transaction deleted");
+
+        List<Transaction> transactions = customerService.getAllTransactionsByCustomerId(3L);
+        assertThat(transactions.size()).isEqualTo(2);
+    }
 }
